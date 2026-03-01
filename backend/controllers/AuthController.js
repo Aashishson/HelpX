@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const UserModel = require("../models/UserModel");
+const JWT_SECRET = process.env.JWT_SECRET;
+const generateAccessToken = require("../helpers/token");
+const generateRefreshToken = require("../helpers/token");
+const cookies = require("cookie-parser");
 
 
 exports.Register = async(req , res) => {
@@ -32,7 +36,9 @@ exports.Register = async(req , res) => {
     })
 }
 
-exports.Login = async(req,res) => {
+exports.LocalLogin = async(req,res) => {
+
+    try{
     let [UserEmail , Password] = req.body;
     UserEmail = UserEmail.toLowerCase();
     let User = UserModel.findOne({UserEmail});
@@ -51,6 +57,33 @@ exports.Login = async(req,res) => {
     }
 
     //Generate Tokens: 
+    const accessToken = generateAccessToken(User);
+    const refreshToken = generateRefreshToken(User);
+  
+    req.cookies("nd_Refresh" , refreshToken,{
+        samesite: none ,
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        success: true,
+        expire: new Date(Date.now() + 7*24*60*60*1000)
+    }
+    )
+
+    const resObj = {
+        status:201,
+        accessToken,
+        role: User.role
+    }
+
+    res.json(resObj);
+
+}catch(error){
+    res.status(500).json({
+        message: "Internal Server Error!"
+    })
+}
+
+
     
 
 
