@@ -7,6 +7,7 @@ const {
   generateRefreshToken,
 } = require("../helpers/token");
 const cookies = require("cookie-parser");
+const verifyUserTokenMiddleware = require("../middlewares/AuthMiddleware");
 
 exports.Register = async (req, res) => {
   let { Username, Email, Password } = req.body;
@@ -18,7 +19,7 @@ exports.Register = async (req, res) => {
       message: "User already Exists! Please try another Email.",
     });
   }
-
+  let verifyUserToken = randomBytes(20).toString("hex");//is a temperory token for email-verification which i will sent to email via link so when the user clicks the link user's email will be verified.
   let newUser = await new UserModel({
     Email: Email,
     Password: await bcrypt.hash(Password, 12),
