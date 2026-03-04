@@ -3,10 +3,7 @@ const { use } = require("react");
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_SECRET;
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_SECRET;
 
-exports.generateAccessToken = async(user) => {
-
-    delete user.iat;
-    delete user.ex;
+exports.generateAccessToken = (user) => {
     return jwt.sign({
         id: user._id,
         role: user.role
@@ -15,15 +12,9 @@ exports.generateAccessToken = async(user) => {
     {
         expiresIn: "15m"
     }
-    
-)
+    )}
 
-}
-
-exports.generateRefreshToken = async(user) => {
-
-    delete user.iat;
-    delete user.ex;
+exports.generateRefreshToken = (user) => {
     return jwt.sign({
         id: user._id,
         role: user.role
@@ -32,5 +23,4 @@ exports.generateRefreshToken = async(user) => {
     {
         expiresIn: "7d"
     }
-)
-}
+)}

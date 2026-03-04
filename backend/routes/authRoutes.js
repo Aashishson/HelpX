@@ -7,3 +7,6 @@ const authController = require("../controllers/AuthController");
 route.post("/signup" ,(...args) => authController.Register(...args));//(...args) => collects all the arguments for function into an array it is basically (req,res,next)
 
 route.post("/login",(...args) => authController.LocalLogin(...args));
+route.get("/verify/:token",(...args) => authController.VerifyEmail(...args));
+
+module.exports = route;

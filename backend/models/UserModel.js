@@ -1,11 +1,11 @@
 const {Schema , model} = require("mongoose");
+const USER_TOKEN_TYPES = process.env.USER_TOKEN_TYPES;
 
 const UserSchema = new Schema({
     Email:{
         unique: true,
         type: String,
         required: true,
-        lowercase: true
     },
     UserName: {
         type: String,
@@ -34,12 +34,16 @@ const UserSchema = new Schema({
         Types:[{type: String, enum: USER_TOKEN_TYPES}]
         //userTokenTypes: Email Verification , Reset Password
     }],
+    Verified: {
+        default: false,
+        type: Boolean    
+    },
     CreatedAt: {
         type: Date,
-        default: Date.now(),
+        default: Date.now()
     }
 })
 
 const UserModel = model("User" , UserSchema);
-module.exports = UserSchema;
+module.exports = UserModel;
 

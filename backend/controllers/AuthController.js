@@ -8,54 +8,63 @@ const {
 } = require("../helpers/token");
 const cookies = require("cookie-parser");
 const verifyUserTokenMiddleware = require("../middlewares/AuthMiddleware");
+const {randomBytes} = require("crypto");
+const { sendMailwithGmail } = require("../helpers/VerifyEmail");
 
 exports.Register = async (req, res) => {
-  let { Username, Email, Password } = req.body;
-  let checkUserExists = await UserModel.findOne({
-    Email: Email.toLowerCase(),
+  const { Username, Email, Password } = req.body;
+  const checkUserExists = await UserModel.findOne({
+    Email
   });
   if (checkUserExists) {
-    res.status(400).json({
+    return res.status(400).json({
       message: "User already Exists! Please try another Email.",
     });
   }
-  let verifyUserToken = randomBytes(20).toString("hex");//is a temperory token for email-verification which i will sent to email via link so when the user clicks the link user's email will be verified.
-  let newUser = await new UserModel({
+  let verifyUserToken = randomBytes(20).toString("hex");
+  //is a temperory token for email-verification which i will send to email via link so when the user clicks the link user's email will be verified.
+  const newUser = new UserModel({
     Email: Email,
     Password: await bcrypt.hash(Password, 12),
     Username: Username,
     Tokens: [
       {
-        Active: True,
-        type: "Email-verification",
+        Active: true,
+        type: "EMAIL_VERIFICATION",
         token: verifyUserToken,
       },
     ],
   });
 
-  await Promise.all([newUser.save()]);
+ 
+  
 
-  res.status(200).json({
+  await Promise.all([newUser.save()]);
+  console.log("USER OBJECT:", newUser);
+   await sendMailwithGmail(newUser, verifyUserToken);
+  // console.log(Email,Password);
+
+  return res.status(200).json({
     message: "Account successfully registered!",
   });
 };
 
 exports.LocalLogin = async (req, res) => {
   try {
-    let { UserEmail, Password } = req.body;
-    UserEmail = UserEmail.toLowerCase();
-    let User = await UserModel.findOne({ UserEmail });
+    let { Email, Password } = req.body;
+    const User = await UserModel.findOne({ Email });
+    // console.log(req.body);
     if (!User) {
-      res.status(404).json({
-        message: "User Not Found!",
+     return res.status(404).json({
+        message: "User Not Found!"
       });
     }
 
-    let checkPassword = await bcrypt.compare(Password, User.Password);
+    const checkPassword = await bcrypt.compare(Password, User.Password);
 
     if (!checkPassword) {
-      res.status(400).json({
-        message: "Invalid Credentials!",
+     return res.status(400).json({
+        message: "Invalid Credentials!"
       });
     }
 
@@ -63,9 +72,8 @@ exports.LocalLogin = async (req, res) => {
     const accessToken = generateAccessToken(User);
     const refreshToken = generateRefreshToken(User);
 
-    req.cookie("nd_Refresh", refreshToken, {
-      samesite: "none",
-      secure: process.env.NODE_ENV === "production",
+    res.cookie("nd_Refresh", refreshToken, {
+      sameSite: "none",
       httpOnly: true,
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
@@ -76,10 +84,32 @@ exports.LocalLogin = async (req, res) => {
       role: User.role,
     };
 
-    res.json(resObj);
+    return res.json(resObj);
   } catch (error) {
     res.status(500).json({
       message: "Internal Server Error!",
     });
   }
 };
+
+exports.VerifyEmail = async (req , res) => {
+    
+  const{token} = req.params;
+  const user = await UserModel.findOne({
+    "Tokens.token": token
+
+  })
+  if(!user){
+    return res.status(402).json({
+      message: "There was a problem following the verification process.Please try again!"
+    })
+  }
+
+  user.Verified = true;
+  await user.save();
+
+  return res.send("Email Verified successfully!")
+      
+
+
+}
