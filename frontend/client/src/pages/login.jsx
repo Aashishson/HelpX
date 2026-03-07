@@ -49,6 +49,14 @@ function Login({ active, setActive }) {
     }catch(error){
       console.log(error);
 
+       setError(
+    error.response?.data?.message || "Login failed. Please try again."
+  );
+
+  toast.error(
+    error.response?.data?.message || "Login failed. Please try again."
+  );
+
     }finally{
       setLoading(false);
     }
@@ -159,5 +167,4 @@ function Login({ active, setActive }) {
     </div>
   );
 }
-
 export default Login;
