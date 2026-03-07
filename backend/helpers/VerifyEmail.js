@@ -17,7 +17,7 @@ const transporter = nodeMailer.createTransport({
 
 });
 
-exports.sendMailwithGmail  = async( newUser , verifyUserToken) => {
+exports.sendMailwithGmailVerify  = async( newUser , verifyUserToken) => {
     const verifyLink = `http://localhost:4000/auth/verify/${verifyUserToken}`;
     htmlTemplate = htmlTemplate.replace("{{verification_link}}", verifyLink);
 console.log("USER OBJECT:", newUser);

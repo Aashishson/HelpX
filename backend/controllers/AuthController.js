@@ -2,19 +2,23 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const UserModel = require("../models/UserModel");
 const JWT_SECRET = process.env.JWT_SECRET;
+const crypto = require("crypto");
 const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../helpers/token");
 const cookies = require("cookie-parser");
 const verifyUserTokenMiddleware = require("../middlewares/AuthMiddleware");
-const {randomBytes} = require("crypto");
-const { sendMailwithGmail } = require("../helpers/VerifyEmail");
+const { randomBytes } = require("crypto");
+const {
+  sendMailwithGmail,
+  sendMailwithGmailVerify,
+} = require("../helpers/VerifyEmail");
 
 exports.Register = async (req, res) => {
   const { Username, Email, Password } = req.body;
   const checkUserExists = await UserModel.findOne({
-    Email
+    Email,
   });
   if (checkUserExists) {
     return res.status(400).json({
@@ -36,12 +40,9 @@ exports.Register = async (req, res) => {
     ],
   });
 
- 
-  
-
   await Promise.all([newUser.save()]);
-  console.log("USER OBJECT:", newUser);
-   await sendMailwithGmail(newUser, verifyUserToken);
+
+  await sendMailwithGmailVerify(newUser, verifyUserToken);
   // console.log(Email,Password);
 
   return res.status(200).json({
@@ -55,16 +56,16 @@ exports.LocalLogin = async (req, res) => {
     const User = await UserModel.findOne({ Email });
     // console.log(req.body);
     if (!User) {
-     return res.status(404).json({
-        message: "User Not Found!"
+      return res.status(401).json({
+        message: "User Not Found!",
       });
     }
 
     const checkPassword = await bcrypt.compare(Password, User.Password);
 
     if (!checkPassword) {
-     return res.status(400).json({
-        message: "Invalid Credentials!"
+      return res.status(401).json({
+        message: "Wrong Password,Please try again!",
       });
     }
 
@@ -92,24 +93,57 @@ exports.LocalLogin = async (req, res) => {
   }
 };
 
-exports.VerifyEmail = async (req , res) => {
-    
-  const{token} = req.params;
+exports.VerifyEmail = async (req, res) => {
+  const { token } = req.params.token;
   const user = await UserModel.findOne({
-    "Tokens.token": token
+    verifyUserToken: token,
+  });
 
-  })
-  if(!user){
+  if (!user) {
     return res.status(402).json({
-      message: "There was a problem following the verification process.Please try again!"
-    })
+      message: "Invalid Token!",
+    });
   }
 
   user.Verified = true;
   await user.save();
 
-  return res.send("Email Verified successfully!")
-      
+  return res.send("Email Verified successfully!");
+};
 
+exports.ResetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await UserModel.findOne({ email });
 
-}
+    if (!user) {
+      return res.status(404).json({
+        message: "No such email found!",
+      });
+    }
+    const resetToken = randomBytes(20).toString("hex");
+
+    const randomOtp = crypto.randomInt(100000, 999999);
+    const token = {
+      Active: true,
+      Expires: new Date(new Date().setDate(new Date().getDate() + 10)),
+      Type: "reset_password",
+      Token: resetToken,
+      Otp: randomOtp,
+    };
+
+    user.Tokens.push(token);
+
+    await UserModel.updateOne({ email }, { $set: { "Tokens.OTP": randomOtp } });
+    await user.save();
+
+    // Write the email function:-
+    
+
+    res.status(202).json({
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

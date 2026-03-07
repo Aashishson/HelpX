@@ -1,4 +1,3 @@
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
@@ -6,7 +5,7 @@ exports.verifyUserToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      req.status(404).json({
+      res.status(404).json({
         message: "No access token found!",
       });
     }
@@ -15,7 +14,7 @@ exports.verifyUserToken = async (req, res, next) => {
     const verified = jwt.verify(token, ACCESS_TOKEN_SECRET);
     req.user = verified;//attaches the user info to the request object and sends it to the controllers/api 
 
-    if (!compareToken) {
+    if (!verified) {
       res.status(400).json({
         message: "Token Expired Error,Please Login Again",
       });
