@@ -85,6 +85,8 @@ exports.LocalLogin = async (req, res) => {
       role: User.role,
     };
 
+    User.isLoggedIn = true;
+    await User.save();
     return res.json(resObj);
   } catch (error) {
     res.status(500).json({

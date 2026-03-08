@@ -1,7 +1,7 @@
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 
-const SECRET_JWT = process.env.SECRET_JWT;
+const SECRET_JWT = process.env.JWT_SECRET;
 const CLIENT_URI = process.env.CLIENT_URI;
 
 const {verifyUserToken} = require("../middlewares/AuthMiddleware.js");
