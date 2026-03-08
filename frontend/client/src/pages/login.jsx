@@ -31,7 +31,7 @@ function Login({ active, setActive }) {
 
     try{
       setLoading(true);
-      const response = await axios.post("http://localhost:4000/api/auth/login", data ,{
+      const response = await axios.post("/api/auth/login", data ,{
           headers: {
             "Content-Type": "application/json",
           },
@@ -130,12 +130,12 @@ function Login({ active, setActive }) {
               type="submit"
               disabled={loading}
               className={`py-2 text-white rounded-lg transition duration-300 ${
-                  loading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-              >
-                {loading ? "Loading..." : "Sign in"}
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+            >
+              {loading ? "Loading..." : "Sign in"}
             </button>
 
             <div className="flex justify-center text-sm">or</div>
@@ -143,6 +143,7 @@ function Login({ active, setActive }) {
             {/* Google Login */}
             <button
               type="button"
+              onClick={() => window.open("/api/authGoogle/google", "_self")}
               className="flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-400 transition"
             >
               <FcGoogle size={20} />

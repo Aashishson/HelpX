@@ -57,15 +57,11 @@ const Signup = ({ active, setActive }) => {
         Password: password,
       };
 
-      const response = await axios.post(
-        "http://localhost:4000/api/auth/signup",
-        data,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await axios.post("/api/auth/signup", data, {
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+      });
 
       // console.log(response.data);
 
@@ -87,7 +83,6 @@ const Signup = ({ active, setActive }) => {
 
   return (
     <>
-      
       <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden">
         <div className="hidden xl:block xl:w-1/2 h-full">
           <img
@@ -192,7 +187,7 @@ const Signup = ({ active, setActive }) => {
 
               <button
                 type="button"
-                onClick={handleGoogleSignup}
+                onClick={() => window.open("/api/authGoogle/google", "_self")}
                 className="flex items-center justify-center gap-3 border rounded-lg py-2 hover:bg-gray-200"
               >
                 <FcGoogle size={20} />
