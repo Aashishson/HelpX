@@ -1,4 +1,4 @@
-import "../../../public/ExternalCss/Slider.css";
+import "./Slider.css";
 import { useNavigate } from "react-router-dom";
 
 function Slider({ active, setActive }) {
