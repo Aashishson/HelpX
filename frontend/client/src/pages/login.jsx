@@ -10,6 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Login({ active, setActive }) {
   const navigate = useNavigate();
+  
 
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
