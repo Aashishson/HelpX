@@ -11,7 +11,7 @@ import "react-toastify/dist/ReactToastify.css";
 function Login({ active, setActive }) {
   const navigate = useNavigate();
 
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -19,45 +19,45 @@ function Login({ active, setActive }) {
   const storedEmail = "test@gmail.com";
   const storedPassword = "Password@123";
 
-  const handleLogin = async(e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-  
+
 
     const data = {
-      Email : email,
-      Password : password,
+      Email: email,
+      Password: password,
     }
 
-    try{
+    try {
       setLoading(true);
-      const response = await axios.post("/api/auth/login", data ,{
-          headers: {
-            "Content-Type": "application/json",
-          },
+      const response = await axios.post("/api/auth/login", data, {
+        headers: {
+          "Content-Type": "application/json",
         },
-      
+      },
+
       );
       localStorage.setItem("accessToken", response.data.accessToken);
       // console.log(response.data);
 
       toast.success("Account Logged-In Successfully!", {
-              className: "bg-blue-600 text-white",
-            });
-            navigate("/user-dashboard");
+        className: "bg-blue-600 text-white",
+      });
+      navigate("/user-dashboard");
 
-    }catch(error){
+    } catch (error) {
       console.log(error);
 
-       setError(
-    error.response?.data?.message || "Login failed. Please try again."
-  );
+      setError(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
 
-  toast.error(
-    error.response?.data?.message || "Login failed. Please try again."
-  );
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
 
-    }finally{
+    } finally {
       setLoading(false);
     }
   }
@@ -68,7 +68,7 @@ function Login({ active, setActive }) {
       <div className="hidden xl:block xl:w-1/2 h-full">
         <img
           src={img}
-          className="w-full h-full object-cover xl:rounded-l-2xl"
+          className="w-full h-full object-cover xl:rounded-r-2xl"
           alt="login"
         />
       </div>
@@ -112,6 +112,14 @@ function Login({ active, setActive }) {
                 placeholder="*******"
                 className="w-full text-sm border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <div className="flex justify-end">
+                <span
+                  className="text-sm text-blue-600 cursor-pointer"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Forgot Password?
+                </span>
+              </div>
             </div>
 
             {/* Error */}
@@ -129,11 +137,10 @@ function Login({ active, setActive }) {
             <button
               type="submit"
               disabled={loading}
-              className={`py-2 text-white rounded-lg transition duration-300 ${
-                loading
+              className={`py-2 text-white rounded-lg transition duration-300 ${loading
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"
-              }`}
+                }`}
             >
               {loading ? "Loading..." : "Sign in"}
             </button>

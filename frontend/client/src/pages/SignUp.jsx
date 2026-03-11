@@ -88,7 +88,7 @@ const Signup = ({ active, setActive }) => {
           <img
             src={aiImage}
             alt="Signup"
-            className="w-full h-full object-cover xl:rounded-l-2xl"
+            className="w-full h-full object-cover xl:rounded-r-2xl"
           />
         </div>
 

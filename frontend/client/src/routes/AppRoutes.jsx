@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Signup from "../pages/SignUp.jsx";
 import Login from "../pages/login.jsx";
+import ForgetPassword from "../pages/ForgetPassword.jsx";
 import Dashboard from "../pages/dashboard/index.jsx";
 import PageNotFound from "../pages/PageNotFound.jsx";
 import { AuthSuccess } from "../pages/AuthSuccess.jsx";
@@ -21,18 +22,21 @@ const AppRoutes = ({ active, setActive }) => {
       />
       <Route
         path="/user-dashboard"
-        element= {<Dashboard/>}
-      />
-      <Route
-        path="*"
-        element = {<PageNotFound/>}
+        element={<Dashboard />}
       />
       <Route
         path="/auth-success"
-        element={<AuthSuccess/>}
+        element={<AuthSuccess />}
+      />
+      <Route
+        path="/forgot-password"
+        element={<ForgetPassword />}
+      />
+      <Route
+        path="*"
+        element={<PageNotFound />}
       />
 
-      
     </Routes>
   );
 };
