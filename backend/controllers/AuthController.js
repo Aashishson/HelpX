@@ -81,7 +81,7 @@ exports.LocalLogin = async (req, res) => {
       });
     }
 
-    const checkPassword = await bcrypt.compare(Password, User.Password);
+    const checkPassword =  bcrypt.compare(Password, User.Password);
 
     if (!checkPassword) {
       return res.status(401).json({
@@ -144,6 +144,12 @@ exports.SendOTP = async (req, res) => {
         message: "No such email found!",
       });
     }
+    user.Tokens.forEach((t) => {
+      if (t.Types.includes("RESET_PASSWORD")) {
+        t.Active = false;
+      }
+    });
+    
     const resetToken = randomBytes(20).toString("hex");
 
     const randomOtp = crypto.randomInt(100000, 999999);
@@ -154,6 +160,8 @@ exports.SendOTP = async (req, res) => {
       token: resetToken,
       OTP: randomOtp,
     };
+
+    
     user.markModified("Tokens");   
     // console.log(token);
 
@@ -161,8 +169,10 @@ exports.SendOTP = async (req, res) => {
    
     await SendResetPasswordMail(randomOtp , user.Email , user.UserName)
     await user.save();
+
+    
     res.status(202).json({
-      message: "Password Link sent successfully",
+      message: "OTP sent successfully!",
     });
   } catch (error) {
     console.error("SendOTP error:", error);
@@ -182,18 +192,19 @@ exports.VerifyOtp = async (req, res) => {
       });
     }
 
-    const token = user.Tokens.find(
-      (t) =>
-        t.Types.includes("RESET_PASSWORD") &&
-        t.OTP === Number(Otp) &&
-        t.Active === true,
-    );
+   const token = user.Tokens.find(
+     (t) =>
+       t.OTP === Number(Otp) &&
+       t.Types.includes("RESET_PASSWORD") &&
+       t.Active === true,
+   );
     // console.log(token);
     // console.log("Tokens:", user.Tokens);
     // console.log("OTP received:", Otp);
 
     if (!token) {
       return res.status(400).json({
+        success: false,
         message: "Invalid OTP",
       });
     }
@@ -206,6 +217,7 @@ exports.VerifyOtp = async (req, res) => {
 
     return res.status(200).json({
       message: "OTP verified successfully",
+      success: true,
       resetToken: token.token,
     });
   } catch (error) {
@@ -234,7 +246,7 @@ exports.VerifyOtp = async (req, res) => {
           message: "Invalid or expired token",
         });
       }
-      console.log(user);
+      
 
       const tokenData = user.Tokens.find(
         (t) =>
@@ -242,6 +254,8 @@ exports.VerifyOtp = async (req, res) => {
           t.Types.includes("RESET_PASSWORD") &&
           t.Active === true,
       );
+
+      
 
       if (!tokenData) {
         return res.status(400).json({
