@@ -1,5 +1,7 @@
-const {Schema , model} = require("mongoose");
-const USER_TOKEN_TYPES = process.env.USER_TOKEN_TYPES;
+const { Schema, model } = require("mongoose");
+const USER_TOKEN_TYPES = process.env.USER_TOKEN_TYPES.split(",").map((type) =>
+  type.trim(),
+);
 
 const UserSchema = new Schema({
   Email: {
@@ -56,6 +58,5 @@ const UserSchema = new Schema({
   },
 });
 
-const UserModel = model("User" , UserSchema);
+const UserModel = model("User", UserSchema);
 module.exports = UserModel;
-

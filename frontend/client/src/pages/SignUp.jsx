@@ -183,16 +183,9 @@ const Signup = ({ active, setActive }) => {
                 {loading ? "Loading..." : "Create Account"}
               </button>
 
-              <div className="flex justify-center text-sm">or</div>
+             
 
-              <button
-                type="button"
-                onClick={() => window.open("/api/authGoogle/google", "_self")}
-                className="flex items-center justify-center gap-3 border rounded-lg py-2 hover:bg-gray-200"
-              >
-                <FcGoogle size={20} />
-                Signup with Google
-              </button>
+           
 
               <p className="text-sm text-center">
                 Already have an account?{" "}

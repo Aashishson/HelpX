@@ -14,6 +14,26 @@ const {
   sendMailwithGmail,
   sendMailwithGmailVerify,
 } = require("../helpers/VerifyEmail");
+const {SendResetPasswordMail} = require("../helpers/ForgotPassword.js");
+
+exports.RefreshToken = async (req, res) => {
+  const refreshToken = req.cookies.nd_refresh;
+  if (!refreshToken)
+    return res.status(401).send("Access Denied: No Refresh Token Provided!");
+  try {
+    const verified = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const accessToken = Token.generateAccessToken(verified);
+    return res.json({ accessToken });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        message: "Refresh token has expired",
+        command: "force_logout",
+      });
+    }
+    return res.status(400).send("Invalid Token");
+  }
+};
 
 exports.Register = async (req, res) => {
   const { Username, Email, Password } = req.body;
@@ -34,7 +54,7 @@ exports.Register = async (req, res) => {
     Tokens: [
       {
         Active: true,
-        type: "EMAIL_VERIFICATION",
+        Types: ["EMAIL_VERIFICATION"],
         token: verifyUserToken,
       },
     ],
@@ -96,9 +116,9 @@ exports.LocalLogin = async (req, res) => {
 };
 
 exports.VerifyEmail = async (req, res) => {
-  const { token } = req.params.token;
+  const  token  = req.params.token;
   const user = await UserModel.findOne({
-    verifyUserToken: token,
+    "Tokens.token": token,
   });
 
   if (!user) {
@@ -113,13 +133,14 @@ exports.VerifyEmail = async (req, res) => {
   return res.send("Email Verified successfully!");
 };
 
-exports.ResetPassword = async (req, res) => {
+exports.SendOTP = async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await UserModel.findOne({ email });
+    const { Email } = req.body;
+    const user = await UserModel.findOne({ Email });
 
+    
     if (!user) {
-      return res.status(404).json({
+      return res.status(402).json({
         message: "No such email found!",
       });
     }
@@ -128,24 +149,141 @@ exports.ResetPassword = async (req, res) => {
     const randomOtp = crypto.randomInt(100000, 999999);
     const token = {
       Active: true,
-      Expires: new Date(new Date().setDate(new Date().getDate() + 10)),
-      Type: "reset_password",
-      Token: resetToken,
-      Otp: randomOtp,
+      Expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      Types: ["RESET_PASSWORD"],
+      token: resetToken,
+      OTP: randomOtp,
     };
+    user.markModified("Tokens");   
+    // console.log(token);
 
     user.Tokens.push(token);
-
-    await UserModel.updateOne({ email }, { $set: { "Tokens.OTP": randomOtp } });
+   
+    await SendResetPasswordMail(randomOtp , user.Email , user.UserName)
     await user.save();
-
-    // Write the email function:-
-    
-
     res.status(202).json({
-      message: "OTP sent successfully",
+      message: "Password Link sent successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("SendOTP error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+exports.VerifyOtp = async (req, res) => {
+  try {
+    const { Email, Otp } = req.body;
+
+    const user = await UserModel.findOne({ Email });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const token = user.Tokens.find(
+      (t) =>
+        t.Types.includes("RESET_PASSWORD") &&
+        t.OTP === Number(Otp) &&
+        t.Active === true,
+    );
+    // console.log(token);
+    // console.log("Tokens:", user.Tokens);
+    // console.log("OTP received:", Otp);
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid OTP",
+      });
+    }
+
+    if (new Date() > token.Expires) {
+      return res.status(400).json({
+        message: "OTP expired",
+      });
+    }
+
+    return res.status(200).json({
+      message: "OTP verified successfully",
+      resetToken: token.token,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+
+
+
+
+  exports.ResetPassword = async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+
+      const user = await UserModel.findOne({
+        "Tokens.token": token,
+        "Tokens.Types": "RESET_PASSWORD",
+        "Tokens.Active": true,
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          message: "Invalid or expired token",
+        });
+      }
+      console.log(user);
+
+      const tokenData = user.Tokens.find(
+        (t) =>
+          t.token === token &&
+          t.Types.includes("RESET_PASSWORD") &&
+          t.Active === true,
+      );
+
+      if (!tokenData) {
+        return res.status(400).json({
+          message: "Invalid token",
+        });
+      }
+
+      if (new Date() > tokenData.Expires) {
+        return res.status(400).json({
+          message: "Token expired",
+        });
+      }
+
+      user.Password = await bcrypt.hash(newPassword, 12);
+
+      tokenData.Active = false;
+
+      await user.save();
+
+      return res.status(200).json({
+        message: "Password changed successfully",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        error: console.error(error),
+        message: "Internal Server Error",
+      });
+    }
+  };
+
+exports.logOutUser = async (req,res) => {
+  try{
+  res.clearCookie("nd_Refresh");
+
+   return res.status(200).json({
+     message: "Successfully Logged Out!",
+   });
+}catch(error){
+  return res.status(500).json({
+    message: "Internal Server Error!"
+  })
+}
+
+  
+}
