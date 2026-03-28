@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 
 exports.verifyUserToken = async (req, res, next) => {
@@ -14,7 +14,7 @@ exports.verifyUserToken = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    const verified = jwt.verify(token, JWT_SECRET);
+    const verified = jwt.verify(token, ACCESS_TOKEN_SECRET);
 
     req.user = verified; // attach user info to request
 
