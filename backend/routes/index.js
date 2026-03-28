@@ -1,5 +1,4 @@
 const route = require("express").Router();
-const authController = require("../controllers/AuthController");
 const authRoutes = require("./authRoutes");
 const googelRoute = require("./googleRoute");
 const complaintRoutes = require("./complaintRoutes");
