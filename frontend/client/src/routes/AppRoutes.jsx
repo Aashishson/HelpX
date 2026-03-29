@@ -8,6 +8,7 @@ import { AuthSuccess } from "../pages/AuthSuccess.jsx";
 import SubmitComplaint from "../pages/dashboard/SubmitComplaint.jsx"
 import FAQ from "../pages/dashboard/FAQ.jsx"
 import Profile from "../pages/dashboard/Profile.jsx"
+import MyComplaint from "../pages/dashboard/MyComplaint.jsx"
 
 const AppRoutes = ({ active, setActive }) => {
   return (
@@ -46,6 +47,10 @@ const AppRoutes = ({ active, setActive }) => {
         <Route
         path="/profile"
         element={<Profile />}
+      />
+       <Route
+        path="/MyComplaint"
+        element={<MyComplaint />}
       />
       <Route
         path="*"

@@ -41,7 +41,7 @@ function Navbar() {
         {/* My Complaint */}
         <li>
           <NavLink
-            to="/complaint"
+            to="/MyComplaint"
             className={({ isActive }) =>
               `${navItem} ${
                 isActive
@@ -53,7 +53,7 @@ function Navbar() {
             {({ isActive }) => (
               <>
                 <i className="fa-solid fa-book text-red-500"></i>
-                <span>My Complaint</span>
+                <span>MyComplaint</span>
 
                 {isActive && (
                   <span className="ml-auto w-2 h-2 bg-blue-700 rounded-full blink-dot"></span>
