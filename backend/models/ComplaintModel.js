@@ -18,20 +18,19 @@ const ComplaintSchema = new Schema({
   priority: {
     type: String,
     enum: ["Low", "Medium", "High"],
-    default: "Low",
-    required: false,
   },
   image: {
-  type: String
+    type: String,
   },
   status: {
     type: String,
+    enum: ["pending", "in-progress", "resolved", "rejected"],
     default: "Pending",
   },
   createdAt: {
     type: Date,
     default: Date.now(),
-  }
+  },
 });
 
 const ComplaintModel = model("Complaint" , ComplaintSchema);
