@@ -1,69 +1,82 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const ComplaintModel = require("../models/ComplaintModel")
+const { GoogleGenAI } = require("@google/genai");
+const ComplaintModel = require("../models/ComplaintModel");
 require("dotenv").config();
 
-// Initialize Gemini (Ensure your API Key is in .env)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 exports.CreateComplaint = async (req, res) => {
   try {
     const { Title, Description } = req.body;
 
-    // 1. Create and Save the initial complaint
     const newComplaint = new ComplaintModel({
       title: Title,
       description: Description,
       userID: req.user._id,
       image: req.file ? `/uploads/${req.file.filename}` : null,
-      // priority defaults to 'Medium' or 'Pending' in your schema
+      priority: "Medium",
     });
 
+    
     const savedComplaint = await newComplaint.save();
 
-    // 2. Trigger Gemini Analysis (Asynchronous)
-    // We don't necessarily need to 'await' this if we want to send the response to the user faster,
-    // but for reliability, we'll do it here.
-    try {
-     
-
-      const prompt = `
-        Analyze the following user complaint and determine its priority (High, Medium, or Low).
-        Return ONLY a JSON object: {"priority": "High/Medium/Low", "reason": "short explanation"}.
-        Complaint: "${Description}"
-      `;
-
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-
-      console.log(responseText);
-      
-      const cleanJson = responseText.replace(/```json|```/g, "").trim();
-      const analysis = JSON.parse(cleanJson);
-
-      // 3. Update the saved complaint with AI results
-      savedComplaint.priority = analysis.priority;
-      console.log(analysis.priority);
-      // savedComplaint.analysisReason = analysis.reason;
-      await savedComplaint.save();
-    } catch (aiError) {
-      console.error("Gemini Analysis Failed:", aiError);
-      // We don't fail the whole request if AI fails, just log it.
-    }
-
-    return res.status(200).json({
-      message: "Complaint Successfully created and analyzed",
+    res.status(200).json({
+      message: "Complaint created successfully",
       data: savedComplaint,
     });
+    analyzeComplaint(newComplaint._id, Description);
+
+   
   } catch (error) {
     console.error(error);
     return res.status(500).json({
       message: "Internal Server Error",
-      error: error
+      error: error,
     });
   }
 };
 
+async function analyzeComplaint(complaintId, description) {
+  try {
+    const prompt = `
+Analyze the complaint and return STRICT JSON ONLY.
+
+Format:
+{"priority": "High" | "Medium" | "Low"}
+
+Complaint: "${description}"
+`;
+
+    // ✅ NEW API CALL
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+
+    let text = response.text;
+
+    text = text.replace(/```json|```/g, "").trim();
+
+    let analysis;
+
+    try {
+      analysis = JSON.parse(text);
+    } catch {
+      console.warn("Invalid JSON from Gemini:", text);
+      analysis = { priority: "Medium" };
+    }
+
+    await ComplaintModel.findByIdAndUpdate(complaintId, {
+      priority: analysis.priority || "Medium",
+    });
+
+    console.log("AI Analysis Done:", analysis);
+  } catch (err) {
+    console.error("Gemini Analysis Failed:", err);
+    
+  }
+}
 // controllers/ComplaintController.js
 
 exports.DeleteComplaint = async (req, res) => {
@@ -81,8 +94,8 @@ exports.DeleteComplaint = async (req, res) => {
 
     // 3. Security: Ensure the user deleting it is the one who created it
     if (complaint.userID.toString() !== currentUserId.toString()) {
-      return res.status(403).json({ 
-        message: "Action denied. You can only delete your own complaints." 
+      return res.status(403).json({
+        message: "Action denied. You can only delete your own complaints.",
       });
     }
 
@@ -92,7 +105,6 @@ exports.DeleteComplaint = async (req, res) => {
     return res.status(200).json({
       message: "Complaint successfully deleted from your dashboard",
     });
-
   } catch (error) {
     console.error("Delete Error:", error);
     return res.status(500).json({
@@ -108,7 +120,10 @@ exports.GetComplaintDetails = async (req, res) => {
     const { id } = req.params; // Get the ._id from the URL
 
     // Find the complaint and 'populate' the userID to get user details
-    const complaint = await ComplaintModel.findById(id).populate("userID", "name email");
+    const complaint = await ComplaintModel.findById(id).populate(
+      "userID",
+      "name email",
+    );
 
     if (!complaint) {
       return res.status(404).json({
@@ -141,14 +156,14 @@ exports.GetRecentComplaints = async (req, res) => {
     // 2. Limit to the 5 most recent ones
     // 3. Populate user info so we know who filed them
     const recentComplaints = await ComplaintModel.find()
-      .sort({ createdAt: -1 }) 
+      .sort({ createdAt: -1 })
       .limit(5)
       .populate("userID", "name email");
 
     if (!recentComplaints || recentComplaints.length === 0) {
       return res.status(200).json({
         message: "No complaints found",
-        complaints: []
+        complaints: [],
       });
     }
 
@@ -180,7 +195,7 @@ exports.GetAllComplaintsForAdmin = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "No complaints found in the system.",
-        complaints: []
+        complaints: [],
       });
     }
 
@@ -204,22 +219,21 @@ exports.GetUserComplaints = async (req, res) => {
     // 1. Define Pagination Parameters
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
-    
 
     // 2. Get Total Count for this specific user
     const totalCount = await ComplaintModel.countDocuments({ userID: userId });
 
     // 3. Fetch Sliced Data
-    const complaints = await ComplaintModel.find({ userID: userId })
-      .sort({ createdAt: -1 })
-      
+    const complaints = await ComplaintModel.find({ userID: userId }).sort({
+      createdAt: -1,
+    });
 
     // 4. Get Status Counts for the Stats Cards
     const [pending, inProgress, resolved, rejected] = await Promise.all([
       ComplaintModel.countDocuments({ userID: userId, status: "pending" }),
       ComplaintModel.countDocuments({ userID: userId, status: "in-progress" }),
       ComplaintModel.countDocuments({ userID: userId, status: "resolved" }),
-      ComplaintModel.countDocuments({ userID: userId, status: "rejected"})
+      ComplaintModel.countDocuments({ userID: userId, status: "rejected" }),
     ]);
 
     res.status(200).json({
@@ -259,7 +273,7 @@ exports.UpdateComplaintStatus = async (req, res) => {
     const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
       id,
       { status },
-      { new: true, runValidators: true } // 'new' returns the updated doc, 'runValidators' checks Schema rules
+      { new: true, runValidators: true }, // 'new' returns the updated doc, 'runValidators' checks Schema rules
     );
 
     if (!updatedComplaint) {
