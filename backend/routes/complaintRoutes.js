@@ -8,7 +8,7 @@ const upload = require("../middlewares/upload");
    ComplaintController.CreateComplaint(...args),
  );
 
- router.post("/delete-complaint/:id", verifyUserToken ,(...args) => ComplaintController.DeleteComplaint(...args));
+ router.delete("/delete-complaint/:id", verifyUserToken ,(...args) => ComplaintController.DeleteComplaint(...args));
 
  router.get("/complaint-details", verifyUserToken , (...args) => ComplaintController.GetComplaintDetails(...args));
 

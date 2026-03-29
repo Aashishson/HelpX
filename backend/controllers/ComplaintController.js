@@ -4,7 +4,7 @@ require("dotenv").config();
 
 // Initialize Gemini (Ensure your API Key is in .env)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 exports.CreateComplaint = async (req, res) => {
   try {
@@ -72,6 +72,7 @@ exports.DeleteComplaint = async (req, res) => {
     const currentUserId = req.user._id; // From your verifyUserToken middleware
 
     // 2. Find the complaint first to check ownership
+   
     const complaint = await ComplaintModel.findById(complaintId);
 
     if (!complaint) {
@@ -79,7 +80,7 @@ exports.DeleteComplaint = async (req, res) => {
     }
 
     // 3. Security: Ensure the user deleting it is the one who created it
-    if (complaint.userID.toString() !== currentUserId.toString()) {
+    if (complaint.userID !== currentUserId) {
       return res.status(403).json({ 
         message: "Action denied. You can only delete your own complaints." 
       });
