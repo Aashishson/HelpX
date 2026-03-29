@@ -65,7 +65,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-file-contract text-blue-600 text-2xl"></i>
               <div>
                 <p className="text-gray-500 text-sm">Total Complaints</p>
-                <p className="text-xl font-bold">24</p>
+                <p className="text-xl font-bold">1</p>
               </div>
             </div>
 
@@ -73,7 +73,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-circle-check text-green-600 text-2xl"></i>
               <div>
                 <p className="text-gray-500 text-sm">Resolved</p>
-                <p className="text-xl font-bold">18</p>
+                <p className="text-xl font-bold">0</p>
               </div>
             </div>
 
@@ -81,7 +81,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-clock text-orange-600 text-2xl"></i>
               <div>
                 <p className="text-gray-500 text-sm">Pending</p>
-                <p className="text-xl font-bold">6</p>
+                <p className="text-xl font-bold">0</p>
               </div>
             </div>
 
@@ -111,9 +111,9 @@ const Dashboard = () => {
                 <tbody>
 
                   <tr className="border-b hover:bg-gray-50">
-                    <td className="py-3">#CMP-1024</td>
-                    <td>Library AC Issue</td>
-                    <td>Infrastructure</td>
+                    <td className="py-3">#146bbf</td>
+                    <td>Lack of books in library</td>
+                    <td>General</td>
                     <td>
                       <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-xs">
                         HIGH
@@ -122,30 +122,7 @@ const Dashboard = () => {
                     <td className="text-blue-600">In Progress</td>
                   </tr>
 
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="py-3">#CMP-1019</td>
-                    <td>Portal Submission Error</td>
-                    <td>Academic</td>
-                    <td>
-                      <span className="bg-yellow-100 text-yellow-600 px-2 py-1 rounded text-xs">
-                        MEDIUM
-                      </span>
-                    </td>
-                    <td className="text-green-600">Resolved</td>
-                  </tr>
-
-                  <tr className="border-b hover:bg-gray-50">
-                    <td className="py-3">#CMP-1012</td>
-                    <td>WiFi Connectivity</td>
-                    <td>Network</td>
-                    <td>
-                      <span className="bg-blue-100 text-blue-600 px-2 py-1 rounded text-xs">
-                        LOW
-                      </span>
-                    </td>
-                    <td className="text-green-600">Resolved</td>
-                  </tr>
-
+                 
                 </tbody>
 
               </table>

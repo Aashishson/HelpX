@@ -16,7 +16,7 @@ function Navbar() {
         {/* Dashboard */}
         <li>
           <NavLink
-            to="/dashboard"
+            to="/user-dashboard"
             className={({ isActive }) =>
               `${navItem} ${
                 isActive
