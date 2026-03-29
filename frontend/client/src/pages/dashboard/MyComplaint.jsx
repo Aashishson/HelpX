@@ -111,7 +111,7 @@ const MyComplaint = () => {
           {/* Filters Section */}
           <div className="max-w-4xl mx-auto px-4 mt-6 flex items-center gap-2 overflow-x-auto pb-2">
             {/* Filter Icon */}
-            <FiFilter className="text-gray-500 text-xl flex-shrink-0 mr-2" />
+            <FiFilter className="text-gray-500 text-xl shrink-0 mr-2" />
 
             {["all", "pending", "in-progress", "resolved", "rejected"].map(
               (status) => (
