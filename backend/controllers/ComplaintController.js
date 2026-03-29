@@ -86,6 +86,7 @@ exports.DeleteComplaint = async (req, res) => {
     const currentUserId = req.user._id; // From your verifyUserToken middleware
 
     // 2. Find the complaint first to check ownership
+   
     const complaint = await ComplaintModel.findById(complaintId);
 
     if (!complaint) {

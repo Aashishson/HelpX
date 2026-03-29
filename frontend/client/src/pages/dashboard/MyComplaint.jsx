@@ -3,10 +3,13 @@ import axios from "axios";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
 import Pagination from "../../pagination/pagination";
+import {HiOutlineTrash } from "react-icons/hi";
 import { FiFilter } from "react-icons/fi";
 
-// 1. Define the Card first
-const ComplaintCard = ({ complaint }) => {
+// ================== Complaint Card ==================
+const ComplaintCard = ({ complaint, onDelete }) => {
+  const [showModal, setShowModal] = useState(false);
+
   const statusStyles = {
     pending: "bg-yellow-100 text-yellow-700",
     "in-progress": "bg-blue-100 text-blue-700",
@@ -15,47 +18,107 @@ const ComplaintCard = ({ complaint }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl border p-5 shadow-sm">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-lg font-semibold">{complaint.title}</h2>
-          <p className="text-sm text-gray-500">
-            {/* Note: MongoDB uses _id, not id */}
-            #{complaint._id?.slice(-6)} · {complaint.category || "General"}
-          </p>
+    <>
+      <div className="bg-white rounded-xl border p-5 shadow-sm relative">
+        
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="text-lg font-semibold">{complaint.title}</h2>
+            <p className="text-sm text-gray-500">
+              #{complaint._id?.slice(-6)} · {complaint.category || "General"}
+            </p>
+          </div>
+
+          <div
+            className={`px-3 py-1 rounded-full text-sm capitalize ${
+              statusStyles[complaint.status] || "bg-gray-100"
+            }`}
+          >
+            {complaint.status || "pending"}
+          </div>
         </div>
-        <div className={`px-3 py-1 rounded-full text-sm capitalize ${statusStyles[complaint.status] || "bg-gray-100"}`}>
-          {complaint.status || "pending"}
+
+        {/* Description */}
+        <p className="text-gray-600 mt-3 text-sm">
+          {complaint.description}
+        </p>
+
+        {/* Date */}
+        <div className="border-t mt-4 pt-3 text-sm text-gray-500">
+          Filed on {new Date(complaint.createdAt).toLocaleDateString()}
+        </div>
+
+        {/* Delete Icon */}
+        <div
+          onClick={() => setShowModal(true)}
+          className="absolute right-5 bottom-5 w-7 h-7 rounded-full flex items-center justify-center 
+                     border-2 border-red-300 
+                     transition duration-300 
+                     hover:shadow-[0_0_12px_3px_#f87171] 
+                     hover:scale-110 cursor-pointer"
+        >
+          <HiOutlineTrash className="text-red-500" />
         </div>
       </div>
-      <p className="text-gray-600 mt-3 text-sm">{complaint.description}</p>
-      <div className="border-t mt-4 pt-3 text-sm text-gray-500">
-        Filed on {new Date(complaint.createdAt).toLocaleDateString()}
-      </div>
-    </div>
+
+      {/* ================== Modal ================== */}
+      {showModal && (
+        <div className=" absolute flex bottom-5 right-5  bg-opacity-40 z-50">
+          
+          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
+            <h2 className="text-lg font-semibold mb-4">
+              Are you sure you want to delete this complaint?
+            </h2>
+
+            <div className="flex justify-center gap-4">
+              
+              {/* YES */}
+              <button
+                onClick={() => {
+                  onDelete(complaint._id);
+                  setShowModal(false);
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Yes
+              </button>
+
+              {/* NO */}
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                No
+              </button>
+
+            </div>
+          </div>
+
+        </div>
+      )}
+    </>
   );
 };
 
-
-
+// ================== Main Component ==================
 const MyComplaint = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeFilter, setActiveFilter] = useState("all");
-  const [complaints, setComplaints] = useState([]); // State for API data
+  const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // ================== Fetch Complaints ==================
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const token = localStorage.getItem("accessToken"); 
-        const response = await axios.get(
-          "/api/complaint/user-complaints",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        const token = localStorage.getItem("accessToken");
+
+        const response = await axios.get("/api/complaint/user-complaints", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (response.data.success) {
           setComplaints(response.data.complaints);
@@ -70,13 +133,28 @@ const MyComplaint = () => {
     fetchComplaints();
   }, []);
 
-  // Filter the live data instead of sample data
+  // ================== Delete Function ==================
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+
+      await axios.delete(`/api/complaint/delete-complaint/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Update UI instantly
+      setComplaints((prev) => prev.filter((c) => c._id !== id));
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
+  };
+
+  // ================== Filters ==================
   const filtered =
     activeFilter === "all"
       ? complaints
       : complaints.filter((c) => c.status === activeFilter);
 
-  // Helper for Stats (using live data)
   const getCount = (status) =>
     complaints.filter((c) => c.status === status).length;
 
@@ -85,20 +163,20 @@ const MyComplaint = () => {
       <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar logic remains same */}
+        
+        {/* Sidebar */}
         <div
-          className={`hidden md:block bg-white shadow transition-all duration-300 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
+          className={`hidden md:block bg-white shadow transition-all duration-300 ${
+            sidebarOpen ? "w-64" : "w-0 overflow-hidden"
+          }`}
         >
           <Navbar />
         </div>
 
+        {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-          {/* Header */}
-          <div className="relative h-220px bg-blue-600">
-            {/* ... header content ... */}
-          </div>
 
-          {/* Stats Section - Updated to use live data */}
+          {/* Stats */}
           <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 px-4">
             <StatCard label="Total" count={complaints.length} />
             <StatCard label="Pending" count={getCount("pending")} />
@@ -136,31 +214,34 @@ const MyComplaint = () => {
          
 
           {/* List Section */}
+          {/* Complaint List */}
           <div className="max-w-4xl mx-auto px-4 mt-6 space-y-4 pb-10">
             {loading ? (
               <p className="text-center">Loading your complaints...</p>
             ) : filtered.length > 0 ? (
-              filtered.map((c) => <ComplaintCard key={c._id} complaint={c} />)
+              filtered.map((c) => (
+                <ComplaintCard
+                  key={c._id}
+                  complaint={c}
+                  onDelete={handleDelete}
+                />
+              ))
             ) : (
-              <p className="text-center text-gray-500">No complaints found</p>
+              <p className="text-center text-gray-500">
+                No complaints found
+              </p>
             )}
           </div>
 
-          {/* Pagination*/}
-          <div className="max-w-4xl mx-auto px-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={(page) => setCurrentPage(page)}
-            />
-          </div>
+       
+
         </div>
       </div>
     </div>
   );
 };
 
-// Small helper for the Stat boxes
+// ================== Stat Card ==================
 const StatCard = ({ label, count }) => (
   <div className="bg-white p-4 rounded-xl shadow text-center">
     <p className="text-2xl font-bold text-blue-600">{count}</p>
