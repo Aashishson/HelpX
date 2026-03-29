@@ -4,7 +4,7 @@ require("dotenv").config();
 
 // Initialize Gemini (Ensure your API Key is in .env)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 exports.CreateComplaint = async (req, res) => {
   try {
@@ -59,6 +59,7 @@ exports.CreateComplaint = async (req, res) => {
     console.error(error);
     return res.status(500).json({
       message: "Internal Server Error",
+      error: error
     });
   }
 };
@@ -234,5 +235,50 @@ exports.GetUserComplaints = async (req, res) => {
   } catch (error) {
     console.error("Fetch Error:", error);
     res.status(500).json({ message: "Error fetching user complaints" });
+  }
+};
+
+// controllers/ComplaintController.js
+
+exports.UpdateComplaintStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // 1. Define allowed statuses to prevent database corruption
+    const validStatuses = ["pending", "in-progress", "resolved", "rejected"];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      });
+    }
+
+    // 2. Update the document
+    const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true, runValidators: true } // 'new' returns the updated doc, 'runValidators' checks Schema rules
+    );
+
+    if (!updatedComplaint) {
+      return res.status(404).json({
+        success: false,
+        message: "Complaint not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Status updated to ${status}`,
+      complaint: updatedComplaint,
+    });
+  } catch (error) {
+    console.error("Update Status Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
   }
 };

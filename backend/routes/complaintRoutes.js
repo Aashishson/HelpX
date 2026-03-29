@@ -8,12 +8,14 @@ const upload = require("../middlewares/upload");
    ComplaintController.CreateComplaint(...args),
  );
 
- router.post("/delete-complaint/:id", verifyUserToken ,(...args) => ComplaintController.DeleteComplaint(...args));
+ router.delete("/delete-complaint/:id", verifyUserToken ,(...args) => ComplaintController.DeleteComplaint(...args));
 
  router.get("/complaint-details", verifyUserToken , (...args) => ComplaintController.GetComplaintDetails(...args));
 
  router.get("/all-complaints" , (...args) => ComplaintController.GetAllComplaintsForAdmin(...args));
 
  router.get("/user-complaints" , verifyUserToken , (...args) => ComplaintController.GetUserComplaints(...args));
+
+ router.patch("/update-status", verifyUserToken , (...args) => ComplaintController.UpdateComplaintStatus(...args));
 
 module.exports = router;

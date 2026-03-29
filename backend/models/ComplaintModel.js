@@ -1,6 +1,5 @@
-const {Schema , model} = require("mongoose");
+const { Schema, model } = require("mongoose");
 const mongoose = require("mongoose");
-
 
 const ComplaintSchema = new Schema({
   title: {
@@ -25,7 +24,7 @@ const ComplaintSchema = new Schema({
   status: {
     type: String,
     enum: ["pending", "in-progress", "resolved", "rejected"],
-    default: "Pending",
+    default: "pending",
   },
   createdAt: {
     type: Date,
@@ -33,5 +32,5 @@ const ComplaintSchema = new Schema({
   },
 });
 
-const ComplaintModel = model("Complaint" , ComplaintSchema);
+const ComplaintModel = model("Complaint", ComplaintSchema);
 module.exports = ComplaintModel;
