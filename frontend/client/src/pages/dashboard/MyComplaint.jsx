@@ -3,7 +3,7 @@ import axios from "axios";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
 import Pagination from "../../pagination/pagination";
-
+import { FiFilter } from "react-icons/fi";
 
 // 1. Define the Card first
 const ComplaintCard = ({ complaint }) => {
@@ -106,7 +106,34 @@ const MyComplaint = () => {
             <StatCard label="Resolved" count={getCount("resolved")} />
           </div>
 
-          {/* Filters remain the same */}
+          
+
+          {/* Filters Section */}
+          <div className="max-w-4xl mx-auto px-4 mt-6 flex items-center gap-2 overflow-x-auto pb-2">
+            {/* Filter Icon */}
+            <FiFilter className="text-gray-500 text-xl flex-shrink-0 mr-2" />
+
+            {["all", "pending", "in-progress", "resolved", "rejected"].map(
+              (status) => (
+                <button
+                  key={status}
+                  onClick={() => {
+                    setActiveFilter(status);
+                    setCurrentPage(1); // Reset to first page when changing filters
+                  }}
+                  className={`px-4 py-1 rounded-full text-sm capitalize whitespace-nowrap transition-colors ${
+                    activeFilter === status
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  {status.replace("-", " ")}
+                </button>
+              ),
+            )}
+          </div>
+
+         
 
           {/* List Section */}
           <div className="max-w-4xl mx-auto px-4 mt-6 space-y-4 pb-10">
