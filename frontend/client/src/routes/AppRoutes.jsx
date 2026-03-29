@@ -2,9 +2,12 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Signup from "../pages/SignUp.jsx";
 import Login from "../pages/login.jsx";
 import ForgetPassword from "../pages/ForgetPassword.jsx";
-import Dashboard from "../pages/dashboard/index.jsx";
+import Dashboard from "../pages/dashboard/dashboard.jsx";
 import PageNotFound from "../pages/PageNotFound.jsx";
 import { AuthSuccess } from "../pages/AuthSuccess.jsx";
+import SubmitComplaint from "../pages/dashboard/SubmitComplaint.jsx"
+import FAQ from "../pages/dashboard/FAQ.jsx"
+import Profile from "../pages/dashboard/Profile.jsx"
 
 const AppRoutes = ({ active, setActive }) => {
   return (
@@ -21,7 +24,7 @@ const AppRoutes = ({ active, setActive }) => {
         element={<Login active={active} setActive={setActive} />}
       />
       <Route
-        path="/user-dashboard"
+        path="/dashboard"
         element={<Dashboard />}
       />
       <Route
@@ -31,6 +34,18 @@ const AppRoutes = ({ active, setActive }) => {
       <Route
         path="/forgot-password"
         element={<ForgetPassword />}
+      />
+      <Route 
+        path="/complaint"
+        element={<SubmitComplaint />}
+      />
+        <Route
+        path="/FAQ"
+        element={<FAQ />}
+      />
+        <Route
+        path="/profile"
+        element={<Profile />}
       />
       <Route
         path="*"

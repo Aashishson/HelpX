@@ -43,11 +43,11 @@ function ForgetPassword() {
 
         setLoading(false);
 
-        if (response.data.message === "OTP sent successfully!") {
+        if (response.data.message ==="OTP sent successfully!") {
           toast.success("OTP sent!");
           setStep(2);
         }
-
+        console.log("otp sent");
         return;
       }
 
@@ -67,15 +67,15 @@ function ForgetPassword() {
 
         setLoading(false);
 
-         if (!checkOtp.data.success) {
-           toast.error("Wrong OTP!");
-         } else{
+        if (!checkOtp.data.success) {
+          toast.error("Wrong OTP!");
+        } else {
           toast.success("OTP verified!");
           setResetToken(checkOtp.data.resetToken);
           setStep(3);
         }
 
-       
+
 
         return;
       }
@@ -163,11 +163,10 @@ function ForgetPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`py-2 text-white rounded-lg transition duration-300 ${
-                    loading
+                  className={`py-2 text-white rounded-lg transition duration-300 ${loading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {loading ? "Sending..." : "Send OTP"}
                 </button>
@@ -193,11 +192,10 @@ function ForgetPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`py-2 text-white rounded-lg transition duration-300 ${
-                    loading
+                  className={`py-2 text-white rounded-lg transition duration-300 ${loading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {loading ? "Verifying..." : "Verify OTP"}
                 </button>
@@ -251,11 +249,10 @@ function ForgetPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`py-2 text-white rounded-lg transition duration-300 ${
-                    loading
+                  className={`py-2 text-white rounded-lg transition duration-300 ${loading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-600 hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {loading ? "Changing..." : "Change Password"}
                 </button>
