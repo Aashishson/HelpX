@@ -23,7 +23,7 @@ export const AuthSuccess = () => {
           });
 
           if (response.data.success) {
-            navigate("/user-dashboard");
+            navigate("/dashboard");
           } else {
             navigate("/login");
           }
