@@ -94,7 +94,7 @@ exports.DeleteComplaint = async (req, res) => {
     }
 
     // 3. Security: Ensure the user deleting it is the one who created it
-    if (complaint.userID.toString() !== currentUserId.toString()) {
+    if (complaint.userID !== currentUserId) {
       return res.status(403).json({
         message: "Action denied. You can only delete your own complaints.",
       });
