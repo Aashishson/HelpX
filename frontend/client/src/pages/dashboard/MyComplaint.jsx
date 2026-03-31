@@ -3,7 +3,7 @@ import axios from "axios";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
 import Pagination from "../../pagination/pagination";
-import {HiOutlineTrash } from "react-icons/hi";
+import { HiOutlineTrash } from "react-icons/hi";
 import { FiFilter } from "react-icons/fi";
 
 // ================== Complaint Card ==================
@@ -20,7 +20,6 @@ const ComplaintCard = ({ complaint, onDelete }) => {
   return (
     <>
       <div className="bg-white rounded-xl border p-5 shadow-sm relative">
-        
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -40,9 +39,7 @@ const ComplaintCard = ({ complaint, onDelete }) => {
         </div>
 
         {/* Description */}
-        <p className="text-gray-600 mt-3 text-sm">
-          {complaint.description}
-        </p>
+        <p className="text-gray-600 mt-3 text-sm">{complaint.description}</p>
 
         {/* Date */}
         <div className="border-t mt-4 pt-3 text-sm text-gray-500">
@@ -64,15 +61,13 @@ const ComplaintCard = ({ complaint, onDelete }) => {
 
       {/* ================== Modal ================== */}
       {showModal && (
-        <div className=" absolute flex bottom-5 right-5  bg-opacity-40 z-50">
-          
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
             <h2 className="text-lg font-semibold mb-4">
               Are you sure you want to delete this complaint?
             </h2>
 
             <div className="flex justify-center gap-4">
-              
               {/* YES */}
               <button
                 onClick={() => {
@@ -91,10 +86,8 @@ const ComplaintCard = ({ complaint, onDelete }) => {
               >
                 No
               </button>
-
             </div>
           </div>
-
         </div>
       )}
     </>
@@ -142,7 +135,6 @@ const MyComplaint = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Update UI instantly
       setComplaints((prev) => prev.filter((c) => c._id !== id));
     } catch (error) {
       console.error("Delete failed", error);
@@ -163,7 +155,6 @@ const MyComplaint = () => {
       <Topbar toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex flex-1 overflow-hidden">
-        
         {/* Sidebar */}
         <div
           className={`hidden md:block bg-white shadow transition-all duration-300 ${
@@ -175,7 +166,6 @@ const MyComplaint = () => {
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto">
-
           {/* Stats */}
           <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 px-4">
             <StatCard label="Total" count={complaints.length} />
@@ -184,11 +174,8 @@ const MyComplaint = () => {
             <StatCard label="Resolved" count={getCount("resolved")} />
           </div>
 
-          
-
-          {/* Filters Section */}
+          {/* Filters */}
           <div className="max-w-4xl mx-auto px-4 mt-6 flex items-center gap-2 overflow-x-auto pb-2">
-            {/* Filter Icon */}
             <FiFilter className="text-gray-500 text-xl shrink-0 mr-2" />
 
             {["all", "pending", "in-progress", "resolved", "rejected"].map(
@@ -197,7 +184,7 @@ const MyComplaint = () => {
                   key={status}
                   onClick={() => {
                     setActiveFilter(status);
-                    setCurrentPage(1); // Reset to first page when changing filters
+                    setCurrentPage(1);
                   }}
                   className={`px-4 py-1 rounded-full text-sm capitalize whitespace-nowrap transition-colors ${
                     activeFilter === status
@@ -211,10 +198,7 @@ const MyComplaint = () => {
             )}
           </div>
 
-         
-
-          {/* List Section */}
-          {/* Complaint List */}
+          {/* List */}
           <div className="max-w-4xl mx-auto px-4 mt-6 space-y-4 pb-10">
             {loading ? (
               <p className="text-center">Loading your complaints...</p>
@@ -227,14 +211,9 @@ const MyComplaint = () => {
                 />
               ))
             ) : (
-              <p className="text-center text-gray-500">
-                No complaints found
-              </p>
+              <p className="text-center text-gray-500">No complaints found</p>
             )}
           </div>
-
-       
-
         </div>
       </div>
     </div>
