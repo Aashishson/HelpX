@@ -29,12 +29,29 @@ const ComplaintCard = ({ complaint, onDelete }) => {
             </p>
           </div>
 
-          <div
-            className={`px-3 py-1 rounded-full text-sm capitalize ${
-              statusStyles[complaint.status] || "bg-gray-100"
-            }`}
-          >
-            {complaint.status || "pending"}
+          {/* 🔥 UPDATED: Status + Priority */}
+          <div className="flex gap-2">
+            {/* Status */}
+            <div
+              className={`px-3 py-1 rounded-full text-sm capitalize ${
+                statusStyles[complaint.status] || "bg-gray-100"
+              }`}
+            >
+              {complaint.status || "pending"}
+            </div>
+
+            {/* Priority */}
+            <div
+              className={`px-3 py-1 rounded-full text-sm capitalize ${
+                complaint.priority === "high"
+                  ? "bg-red-100 text-red-600"
+                  : complaint.priority === "medium"
+                    ? "bg-yellow-100 text-yellow-600"
+                    : "bg-green-100 text-green-600"
+              }`}
+            >
+              {complaint.priority || "low"}
+            </div>
           </div>
         </div>
 
