@@ -13,7 +13,7 @@ exports.CreateComplaint = async (req, res) => {
     const newComplaint = new ComplaintModel({
       title: Title,
       description: Description,
-      userID: req.user._id,
+      userID: req.user.id,
       image: req.file ? `/uploads/${req.file.filename}` : null,
       priority: "Medium",
     });
@@ -81,9 +81,9 @@ Complaint: "${description}"
 
 exports.DeleteComplaint = async (req, res) => {
   try {
-    // 1. Get the MongoDB _id from the URL parameters
+   
     const complaintId = req.params.id;
-    const currentUserId = req.user._id; // From your verifyUserToken middleware
+    const currentUserId = req.user.id; // From your verifyUserToken middleware
 
     // 2. Find the complaint first to check ownership
    
@@ -94,11 +94,11 @@ exports.DeleteComplaint = async (req, res) => {
     }
 
     // 3. Security: Ensure the user deleting it is the one who created it
-    if (complaint.userID !== currentUserId) {
-      return res.status(403).json({
-        message: "Action denied. You can only delete your own complaints.",
-      });
-    }
+  if (complaint.userID.toString() !== currentUserId) {
+    return res.status(403).json({
+      message: "Action denied. You can only delete your own complaints.",
+    });
+  }
 
     // 4. Perform the deletion using the ._id
     await ComplaintModel.findByIdAndDelete(complaintId);
@@ -180,6 +180,30 @@ exports.GetRecentComplaints = async (req, res) => {
     });
   }
 };
+exports.GetUserRecentComplaints = async (req, res) => {
+  try {
+    const userId = req.user.id; // from middleware
+
+    const recentComplaints = await ComplaintModel.find({
+      userID: userId,
+    })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+      console.log(userId);
+      
+    return res.status(200).json({
+      success: true,
+      count: recentComplaints.length,
+      complaints: recentComplaints,
+    });
+  } catch (error) {
+    console.error("Recent Complaints Error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
 
 // controllers/ComplaintController.js
 
@@ -215,7 +239,7 @@ exports.GetAllComplaintsForAdmin = async (req, res) => {
 
 exports.GetUserComplaints = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id;
 
     // 1. Define Pagination Parameters
     const page = parseInt(req.query.page) || 1;
@@ -237,6 +261,7 @@ exports.GetUserComplaints = async (req, res) => {
       ComplaintModel.countDocuments({ userID: userId, status: "rejected" }),
     ]);
 
+    console.log("FULL USER OBJECT:", req.user);
     res.status(200).json({
       success: true,
       complaints,

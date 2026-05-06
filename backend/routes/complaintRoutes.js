@@ -18,4 +18,7 @@ const upload = require("../middlewares/upload");
 
  router.patch("/update-status", verifyUserToken , (...args) => ComplaintController.UpdateComplaintStatus(...args));
 
+ router.get("/user-recent-complaints" , verifyUserToken , (...args) =>
+ComplaintController.GetUserRecentComplaints(...args));
+
 module.exports = router;
