@@ -17,6 +17,12 @@ const ComplaintCard = ({ complaint, onDelete }) => {
     rejected: "bg-red-100 text-red-700",
   };
 
+  const priorityStyles = {
+    Medium: "bg-yellow-100 text-yellow-700",
+    Low: "bg-green-100 text-green-700",
+    High: "bg-red-100 text-red-700",
+  };
+
   return (
     <>
       <div className="bg-white rounded-xl border p-5 shadow-sm relative">
@@ -43,14 +49,10 @@ const ComplaintCard = ({ complaint, onDelete }) => {
             {/* Priority */}
             <div
               className={`px-3 py-1 rounded-full text-sm capitalize ${
-                complaint.priority === "high"
-                  ? "bg-red-100 text-red-600"
-                  : complaint.priority === "medium"
-                    ? "bg-yellow-100 text-yellow-600"
-                    : "bg-green-100 text-green-600"
+                priorityStyles[complaint.priority]
               }`}
             >
-              {complaint.priority || "low"}
+              {complaint.priority || "Low"}
             </div>
           </div>
         </div>

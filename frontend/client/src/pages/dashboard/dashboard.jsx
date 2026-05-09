@@ -6,7 +6,13 @@ import { useNavigate } from "react-router-dom";
 const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [complaints, setComplaints] = useState([]);
-   const [totalComplaints, setTotalComplaints] = useState(0);
+  const [totalComplaints, setTotalComplaints] = useState(0);
+
+  const priorityStyles = {
+    Medium: "bg-yellow-100 text-yellow-700",
+    Low: "bg-green-100 text-green-700",
+    High: "bg-red-100 text-red-700",
+  };
   const navigate = useNavigate();
 
   // 🔥 Fetch recent complaints
@@ -44,7 +50,7 @@ const Dashboard = () => {
     } catch (error) {
       console.error(error);
     }
-  }
+  };
 
   useEffect(() => {
     fetchRecentComplaints();
@@ -153,7 +159,10 @@ const Dashboard = () => {
                           <td>{c.category}</td>
 
                           <td>
-                            <span className="px-2 py-1 rounded text-xs bg-red-100 text-red-600">
+                            <span
+                              className={`px-2 py-1 rounded text-xs
+                              ${priorityStyles[c.priority]}`}
+                            >
                               {c.priority}
                             </span>
                           </td>

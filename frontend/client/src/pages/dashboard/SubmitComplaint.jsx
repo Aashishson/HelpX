@@ -45,7 +45,7 @@ const ComplaintForm = () => {
       );
 
       toast.success("Complaint submitted!");
-      navigate("/dashboard"); // Redirect to your cards view
+      navigate("/user-dashboard"); // Redirect to your cards view
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit complaint.");

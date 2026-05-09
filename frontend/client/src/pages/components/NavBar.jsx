@@ -7,16 +7,14 @@ function Navbar() {
 
   return (
     <div className="w-full h-screen bg-gray-50">
-
       {/* Logo */}
       <img src={logo} alt="logo" className="h-28 object-contain ml-2" />
 
       <ul className="ml-10 space-y-3">
-
         {/* Dashboard */}
         <li>
           <NavLink
-            to="/dashboard"
+            to="/user-dashboard"
             className={({ isActive }) =>
               `${navItem} ${
                 isActive
@@ -112,7 +110,6 @@ function Navbar() {
             )}
           </NavLink>
         </li>
-
       </ul>
     </div>
   );
