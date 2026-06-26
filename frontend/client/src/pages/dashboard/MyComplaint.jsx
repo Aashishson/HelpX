@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
-import Pagination from "../../pagination/Pagination";
+import Pagination from "../../pagination/pagination";
 import { HiOutlineTrash } from "react-icons/hi";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FiFilter } from "react-icons/fi";
@@ -30,7 +30,10 @@ const ComplaintCard = ({ complaint, onDelete }) => {
 
   return (
     <>
-      <div className="bg-white rounded-xl border p-5 shadow-sm">
+      <div
+        className="bg-white rounded-xl border p-5 shadow-sm cursor-pointer hover:shadow-md hover:border-blue-200 transition duration-200"
+        onClick={() => navigate(`/complaint-details/${complaint._id}`)}
+      >
         {/* Header */}
         <div className="flex justify-between items-start">
           <div>
@@ -72,7 +75,10 @@ const ComplaintCard = ({ complaint, onDelete }) => {
           <div className="flex gap-3">
             {/* Edit */}
             <div
-              onClick={() => navigate(`/edit-complaint/${complaint._id}`)}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/edit-complaint/${complaint._id}`);
+              }}
               className="w-7 h-7 rounded-full flex items-center justify-center
                          border-2 border-blue-300 cursor-pointer
                          transition duration-300
@@ -85,7 +91,10 @@ const ComplaintCard = ({ complaint, onDelete }) => {
 
             {/* Delete */}
             <div
-              onClick={() => setShowModal(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowModal(true);
+              }}
               className="w-7 h-7 rounded-full flex items-center justify-center
                          border-2 border-red-300 cursor-pointer
                          transition duration-300

@@ -23,7 +23,7 @@ const EditComplaint = () => {
     const fetchComplaint = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const response = await axios.get(`/api/complaint/edit-complaint/${id}`, {
+        const response = await axios.get(`/api/complaint/details/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const { title, description } = response.data.complaint;
@@ -50,7 +50,7 @@ const EditComplaint = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuccess(true);
-      setTimeout(() => navigate("/my-complaints"), 1500);
+      setTimeout(() => navigate("/MyComplaint"), 1500);
     } catch (err) {
       setError(
         err.response?.data?.message || "Failed to update. Please try again.",

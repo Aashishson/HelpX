@@ -10,6 +10,7 @@ import FAQ from "../pages/dashboard/FAQ.jsx"
 import Profile from "../pages/dashboard/Profile.jsx"
 import MyComplaint from "../pages/dashboard/MyComplaint.jsx"
 import EditComplaint from "../pages/dashboard/EditComplaint.jsx";
+import ComplaintDetail from "../pages/dashboard/complaintDetail.jsx";
 
 const AppRoutes = ({ active, setActive }) => {
   return (
@@ -33,6 +34,7 @@ const AppRoutes = ({ active, setActive }) => {
       <Route path="/profile" element={<Profile />} />
       <Route path="/MyComplaint" element={<MyComplaint />} />
       <Route path="/edit-complaint/:id" element={<EditComplaint />} />
+      <Route path="/complaint-details/:id" element={<ComplaintDetail />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
