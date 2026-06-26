@@ -1,7 +1,7 @@
 import React from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const pagination = ({ currentPage, totalPages, onPageChange }) => {
+const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   // Don't render if there's only one page
   if (totalPages <= 1) return null;
 
@@ -35,4 +35,4 @@ const pagination = ({ currentPage, totalPages, onPageChange }) => {
   );
 };
 
-export default pagination;
+export default Pagination;
