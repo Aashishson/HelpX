@@ -1086,7 +1086,7 @@ const AdminDashboard = () => {
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
-                  {["all", "user", "admin"].map((r) => (
+                  {["all", "user", "Admin"].map((r) => (
                     <button
                       key={r}
                       onClick={() => {
@@ -1191,17 +1191,17 @@ const AdminDashboard = () => {
                                     flexShrink: 0,
                                   }}
                                 >
-                                  {avatar(u.name)}
+                                  {avatar(u.UserName)}
                                 </div>
                                 <span
                                   style={{ fontWeight: 600, color: "#0F172A" }}
                                 >
-                                  {u.name}
+                                  {u.UserName}
                                 </span>
                               </div>
                             </td>
                             <td style={{ ...tableCell, color: "#2563EB" }}>
-                              {u.email}
+                              {u.Email}
                             </td>
                             <td style={tableCell}>
                               <span
@@ -1222,7 +1222,7 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td style={tableCell}>
-                              {u.createdAt
+                              {u.CreatedAt
                                 ? new Date(u.createdAt).toLocaleDateString(
                                     "en-US",
                                     {
@@ -1234,7 +1234,7 @@ const AdminDashboard = () => {
                                 : "—"}
                             </td>
                             <td style={tableCell}>
-                              {u.role === "admin" ? (
+                              {u.role === "Admin" ? (
                                 <span
                                   style={{ fontSize: 12.5, color: "#94A3B8" }}
                                 >
