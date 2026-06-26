@@ -36,17 +36,14 @@ function Login({ active, setActive }) {
         headers: {
           "Content-Type": "application/json",
         },
-      },
-
-      );
+      });
       localStorage.setItem("accessToken", response.data.accessToken);
-      // console.log(response.data);
+      localStorage.setItem("role", response.data.role); 
 
       toast.success("Account Logged-In Successfully!", {
         className: "bg-blue-600 text-white",
       });
       navigate("/user-dashboard");
-
     } catch (error) {
       console.log(error);
 

@@ -14,7 +14,7 @@ exports.verifyUserToken = async (req, res, next) => {
 
     const token = authHeader.split(" ")[1];
 
-    const verified = jwt.verify(token, JWT_SECRET);
+    const verified = jwt.verify(token, ACCESS_TOKEN_SECRET);
 
     req.user = verified; // attach user info to request
 

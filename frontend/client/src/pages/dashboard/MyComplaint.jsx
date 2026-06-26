@@ -7,6 +7,7 @@ import Pagination from "../../pagination/pagination";
 import { HiOutlineTrash } from "react-icons/hi";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FiFilter } from "react-icons/fi";
+import { getUserRole } from "../../utils/auth";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -14,6 +15,7 @@ const ITEMS_PER_PAGE = 5;
 const ComplaintCard = ({ complaint, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  const isAdmin = getUserRole() === "Admin";
 
   const statusStyles = {
     pending: "bg-yellow-100 text-yellow-700",
@@ -73,6 +75,24 @@ const ComplaintCard = ({ complaint, onDelete }) => {
 
           {/* Action Icons */}
           <div className="flex gap-3">
+            {/* Update Status — Admin only */}
+            {isAdmin && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/edit-status/${complaint._id}`);
+                }}
+                className="w-7 h-7 rounded-full flex items-center justify-center
+                           border-2 border-purple-300 cursor-pointer
+                           transition duration-300
+                           hover:shadow-[0_0_12px_3px_#d8b4fe]
+                           hover:scale-110"
+                title="Update status"
+              >
+                <i className="fa-solid fa-pen-to-square text-purple-500 text-xs" />
+              </div>
+            )}
+
             {/* Edit */}
             <div
               onClick={(e) => {

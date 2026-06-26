@@ -11,6 +11,8 @@ import Profile from "../pages/dashboard/Profile.jsx"
 import MyComplaint from "../pages/dashboard/MyComplaint.jsx"
 import EditComplaint from "../pages/dashboard/EditComplaint.jsx";
 import ComplaintDetail from "../pages/dashboard/complaintDetail.jsx";
+import AdminDashboard from "../pages/dashboard/AdminDashboard.jsx";
+import EditStatus from "../pages/dashboard/EditStatus.jsx";
 
 const AppRoutes = ({ active, setActive }) => {
   return (
@@ -27,6 +29,8 @@ const AppRoutes = ({ active, setActive }) => {
         element={<Login active={active} setActive={setActive} />}
       />
       <Route path="/user-dashboard" element={<Dashboard />} />
+      <Route path="/admin-dashboard" element={<AdminDashboard />} />
+      <Route path="/edit-status/:id" element={<EditStatus />} />
       <Route path="/auth-success" element={<AuthSuccess />} />
       <Route path="/forgot-password" element={<ForgetPassword />} />
       <Route path="/complaint" element={<SubmitComplaint />} />
