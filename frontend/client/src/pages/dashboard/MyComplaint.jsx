@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
-import Pagination from "../../pagination/pagination";
+import Pagination from "../../pagination/Pagination";
 import { HiOutlineTrash } from "react-icons/hi";
 import { HiOutlinePencilSquare } from "react-icons/hi2";
 import { FiFilter } from "react-icons/fi";

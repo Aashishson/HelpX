@@ -9,6 +9,7 @@ import SubmitComplaint from "../pages/dashboard/SubmitComplaint.jsx"
 import FAQ from "../pages/dashboard/FAQ.jsx"
 import Profile from "../pages/dashboard/Profile.jsx"
 import MyComplaint from "../pages/dashboard/MyComplaint.jsx"
+import EditComplaint from "../pages/dashboard/EditComplaint.jsx";
 
 const AppRoutes = ({ active, setActive }) => {
   return (
@@ -24,39 +25,15 @@ const AppRoutes = ({ active, setActive }) => {
         path="/login"
         element={<Login active={active} setActive={setActive} />}
       />
-      <Route
-        path="/user-dashboard"
-        element={<Dashboard />}
-      />
-      <Route
-        path="/auth-success"
-        element={<AuthSuccess />}
-      />
-      <Route
-        path="/forgot-password"
-        element={<ForgetPassword />}
-      />
-      <Route 
-        path="/complaint"
-        element={<SubmitComplaint />}
-      />
-        <Route
-        path="/FAQ"
-        element={<FAQ />}
-      />
-        <Route
-        path="/profile"
-        element={<Profile />}
-      />
-       <Route
-        path="/MyComplaint"
-        element={<MyComplaint />}
-      />
-      <Route
-        path="*"
-        element={<PageNotFound />}
-      />
-
+      <Route path="/user-dashboard" element={<Dashboard />} />
+      <Route path="/auth-success" element={<AuthSuccess />} />
+      <Route path="/forgot-password" element={<ForgetPassword />} />
+      <Route path="/complaint" element={<SubmitComplaint />} />
+      <Route path="/FAQ" element={<FAQ />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/MyComplaint" element={<MyComplaint />} />
+      <Route path="/edit-complaint/:id" element={<EditComplaint />} />
+      <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };

@@ -322,3 +322,55 @@ exports.UpdateComplaintStatus = async (req, res) => {
     });
   }
 };
+
+
+// Add this to controllers/ComplaintController.js
+
+exports.EditComplaint = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+    const currentUserId = req.user.id;
+
+    // 1. Find the complaint
+    const complaint = await ComplaintModel.findById(id);
+
+    if (!complaint) {
+      return res.status(404).json({ message: "Complaint not found" });
+    }
+
+    // 2. Only the owner can edit
+    if (complaint.userID.toString() !== currentUserId) {
+      return res.status(403).json({
+        message: "Action denied. You can only edit your own complaints.",
+      });
+    }
+
+    // 3. Only allow editing if not resolved/rejected
+    if (complaint.status === "resolved" || complaint.status === "rejected") {
+      return res.status(400).json({
+        message: `Complaint cannot be edited as it is already ${complaint.status}.`,
+      });
+    }
+
+    // 4. Update only title and description
+    const updated = await ComplaintModel.findByIdAndUpdate(
+      id,
+      { title, description },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Complaint updated successfully",
+      complaint: updated,
+    });
+  } catch (error) {
+    console.error("Edit Complaint Error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+

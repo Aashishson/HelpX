@@ -1,3 +1,4 @@
+const { verify } = require("jsonwebtoken");
 const ComplaintController = require("../controllers/ComplaintController");
 const router = require("express").Router();
 const { verifyUserToken } = require("../middlewares/AuthMiddleware");
@@ -20,5 +21,7 @@ const upload = require("../middlewares/upload");
 
  router.get("/user-recent-complaints" , verifyUserToken , (...args) =>
 ComplaintController.GetUserRecentComplaints(...args));
+
+ router.post("/edit-complaint/:id" , verifyUserToken , (...args) => ComplaintController.EditComplaint(...args));
 
 module.exports = router;
