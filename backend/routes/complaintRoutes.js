@@ -1,27 +1,55 @@
-const { verify } = require("jsonwebtoken");
 const ComplaintController = require("../controllers/ComplaintController");
 const router = require("express").Router();
 const { verifyUserToken } = require("../middlewares/AuthMiddleware");
 const upload = require("../middlewares/upload");
 
-// Pass the function directly. Express will handle the arguments.
- router.post("/create-complaint", verifyUserToken, upload.single("complaint-Image") , (...args) =>
-   ComplaintController.CreateComplaint(...args),
- );
+// Create complaint
+router.post(
+  "/create-complaint",
+  verifyUserToken,
+  upload.single("complaint-Image"),
+  ComplaintController.CreateComplaint,
+);
 
- router.delete("/delete-complaint/:id", verifyUserToken ,(...args) => ComplaintController.DeleteComplaint(...args));
+// Delete complaint
+router.delete(
+  "/delete-complaint/:id",
+  verifyUserToken,
+  ComplaintController.DeleteComplaint,
+);
 
- router.get("/complaint-details", verifyUserToken , (...args) => ComplaintController.GetComplaintDetails(...args));
+// Get single complaint details — fixed: added /:id param
+router.get(
+  "/details/:id",
+  verifyUserToken,
+  ComplaintController.GetComplaintDetails,
+);
 
- router.get("/all-complaints" , (...args) => ComplaintController.GetAllComplaintsForAdmin(...args));
+// Get all complaints (admin)
+router.get("/all-complaints", ComplaintController.GetAllComplaintsForAdmin);
 
- router.get("/user-complaints" , verifyUserToken , (...args) => ComplaintController.GetUserComplaints(...args));
+// Get logged-in user's complaints
+router.get(
+  "/user-complaints",
+  verifyUserToken,
+  ComplaintController.GetUserComplaints,
+);
 
- router.patch("/update-status", verifyUserToken , (...args) => ComplaintController.UpdateComplaintStatus(...args));
+// Update complaint status (admin) — fixed: added /:id param
+router.patch(
+  "/update-status/:id",
+  verifyUserToken,
+  ComplaintController.UpdateComplaintStatus,
+);
 
- router.get("/user-recent-complaints" , verifyUserToken , (...args) =>
-ComplaintController.GetUserRecentComplaints(...args));
+// Get user's recent complaints
+router.get(
+  "/user-recent-complaints",
+  verifyUserToken,
+  ComplaintController.GetUserRecentComplaints,
+);
 
- router.post("/edit-complaint/:id" , verifyUserToken , (...args) => ComplaintController.EditComplaint(...args));
+// Edit complaint — fixed: changed POST to PUT
+router.put("/edit/:id", verifyUserToken, ComplaintController.EditComplaint);
 
 module.exports = router;

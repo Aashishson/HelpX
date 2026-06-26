@@ -285,7 +285,6 @@ exports.UpdateComplaintStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // 1. Define allowed statuses to prevent database corruption
     const validStatuses = ["pending", "in-progress", "resolved", "rejected"];
 
     if (!validStatuses.includes(status)) {
@@ -295,24 +294,42 @@ exports.UpdateComplaintStatus = async (req, res) => {
       });
     }
 
-    // 2. Update the document
-    const updatedComplaint = await ComplaintModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true, runValidators: true }, // 'new' returns the updated doc, 'runValidators' checks Schema rules
+    // Populate userID to get name + email for the notification
+    const complaint = await ComplaintModel.findById(id).populate(
+      "userID",
+      "name email",
     );
 
-    if (!updatedComplaint) {
+    if (!complaint) {
       return res.status(404).json({
         success: false,
         message: "Complaint not found",
       });
     }
 
+    // Update the status
+    complaint.status = status;
+    await complaint.save();
+
+    // Send email only for resolved or rejected
+    if (status === "resolved" || status === "rejected") {
+      const user = complaint.userID;
+
+      if (user?.email) {
+        // Fire and forget — don't block the response
+        sendStatusEmail({
+          to: user.email,
+          userName: user.name || "User",
+          complaintTitle: complaint.title,
+          status,
+        }).catch((err) => console.error("Email sending failed:", err));
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: `Status updated to ${status}`,
-      complaint: updatedComplaint,
+      complaint,
     });
   } catch (error) {
     console.error("Update Status Error:", error);
@@ -323,8 +340,6 @@ exports.UpdateComplaintStatus = async (req, res) => {
   }
 };
 
-
-// Add this to controllers/ComplaintController.js
 
 exports.EditComplaint = async (req, res) => {
   try {
