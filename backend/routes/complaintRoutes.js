@@ -2,6 +2,7 @@ const ComplaintController = require("../controllers/ComplaintController");
 const router = require("express").Router();
 const { verifyUserToken } = require("../middlewares/AuthMiddleware");
 const upload = require("../middlewares/upload");
+const {isAdmin} = require("../middlewares/RoleMiddleware");
 
 // Create complaint
 router.post(
@@ -26,7 +27,7 @@ router.get(
 );
 
 // Get all complaints (admin)
-router.get("/all-complaints", ComplaintController.GetAllComplaintsForAdmin);
+router.get("/all-complaints",verifyUserToken,isAdmin, ComplaintController.GetAllComplaintsForAdmin);
 
 // Get logged-in user's complaints
 router.get(
@@ -39,6 +40,7 @@ router.get(
 router.patch(
   "/update-status/:id",
   verifyUserToken,
+  isAdmin,
   ComplaintController.UpdateComplaintStatus,
 );
 

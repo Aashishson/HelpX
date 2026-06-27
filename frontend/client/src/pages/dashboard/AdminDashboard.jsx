@@ -1,17 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-// ⚠️ Adjust these two import paths to match where these files actually live in your project
 import Navbar from "../components/Navbar";
 import Topbar from "../components/Topbar";
 
-// ── Axios helper ──────────────────────────────────────────────
 const api = (token) => ({
   headers: { Authorization: `Bearer ${token}` },
 });
 
-// ── Tiny helpers ──────────────────────────────────────────────
 const avatar = (name = "") =>
   name
     .split(" ")
@@ -30,8 +26,7 @@ const avatarColor = (name = "") => {
     ["#FFE4E6", "#9F1239"],
   ];
   if (!name || name.length === 0) return colors[0];
-  const i = name.charCodeAt(0) % colors.length;
-  return colors[i] ?? colors[0];
+  return colors[name.charCodeAt(0) % colors.length] ?? colors[0];
 };
 
 const statusMeta = {
@@ -61,7 +56,6 @@ const statusMeta = {
   },
 };
 
-// ── Stat Card ─────────────────────────────────────────────────
 const StatCard = ({ label, value, sub, subColor, accent, icon }) => (
   <div
     style={{
@@ -114,7 +108,6 @@ const StatCard = ({ label, value, sub, subColor, accent, icon }) => (
   </div>
 );
 
-// ── Status Badge ──────────────────────────────────────────────
 const Badge = ({ status }) => {
   const m = statusMeta[status] || {
     label: status,
@@ -150,7 +143,6 @@ const Badge = ({ status }) => {
   );
 };
 
-// ── Bar Chart ─────────────────────────────────────────────────
 const BarChart = ({ counts }) => {
   const bars = [
     { label: "Pending", value: counts.pending || 0, color: "#F59E0B" },
@@ -223,7 +215,6 @@ const BarChart = ({ counts }) => {
   );
 };
 
-// ── Main Component ────────────────────────────────────────────
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
@@ -231,76 +222,42 @@ const AdminDashboard = () => {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Data states
   const [complaints, setComplaints] = useState([]);
-  const [recentComplaints, setRecentComplaints] = useState([]);
   const [users, setUsers] = useState([]);
   const [loadingComplaints, setLoadingComplaints] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
 
-  // Complaint status dropdown
   const [updatingId, setUpdatingId] = useState(null);
+  const [togglingRoleId, setTogglingRoleId] = useState(null);
 
-  // User management filter
   const [roleFilter, setRoleFilter] = useState("all");
   const [userPage, setUserPage] = useState(1);
   const USERS_PER_PAGE = 5;
 
-  // Complaint list filter
   const [statusFilter, setStatusFilter] = useState("all");
   const [complaintPage, setComplaintPage] = useState(1);
   const COMPLAINTS_PER_PAGE = 7;
 
-  // ── Fetch all complaints ──
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axios.get(
-          "/api/complaint/all-complaints",
-          api(token),
-        );
+    axios
+      .get("/api/complaint/all-complaints", api(token))
+      .then((res) => {
         if (res.data.success) setComplaints(res.data.complaints);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingComplaints(false);
-      }
-    };
-    fetch();
+      })
+      .catch(console.error)
+      .finally(() => setLoadingComplaints(false));
   }, []);
 
-  // ── Fetch recent complaints ──
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axios.get(
-          "/api/complaint/recent-complaints",
-          api(token),
-        );
-        if (res.data.success) setRecentComplaints(res.data.complaints);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetch();
-  }, []);
-
-  // ── Fetch users ──
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await axios.get("/api/auth/all-users", api(token));
+    axios
+      .get("/api/auth/all-users", api(token))
+      .then((res) => {
         if (res.data.success) setUsers(res.data.users);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoadingUsers(false);
-      }
-    };
-    fetch();
+      })
+      .catch(console.error)
+      .finally(() => setLoadingUsers(false));
   }, []);
 
-  // ── Update complaint status ──
   const updateStatus = async (id, status) => {
     setUpdatingId(id);
     try {
@@ -319,7 +276,29 @@ const AdminDashboard = () => {
     }
   };
 
-  // ── Counts ──
+  // ── Toggle user role ──────────────────────────────────────────
+  const toggleRole = async (userId, currentRole) => {
+    setTogglingRoleId(userId);
+    try {
+      const res = await axios.patch(
+        `/api/auth/toggle-role/${userId}`,
+        {},
+        api(token),
+      );
+      if (res.data.success) {
+        setUsers((prev) =>
+          prev.map((u) =>
+            u._id === userId ? { ...u, role: res.data.role } : u,
+          ),
+        );
+      }
+    } catch (e) {
+      console.error("Toggle role failed:", e);
+    } finally {
+      setTogglingRoleId(null);
+    }
+  };
+
   const counts = {
     total: complaints.length,
     pending: complaints.filter((c) => c.status === "pending").length,
@@ -328,7 +307,6 @@ const AdminDashboard = () => {
     rejected: complaints.filter((c) => c.status === "rejected").length,
   };
 
-  // ── Filtered complaints ──
   const filteredComplaints =
     statusFilter === "all"
       ? complaints
@@ -341,7 +319,6 @@ const AdminDashboard = () => {
     complaintPage * COMPLAINTS_PER_PAGE,
   );
 
-  // ── Filtered users ──
   const filteredUsers =
     roleFilter === "all"
       ? users
@@ -352,9 +329,8 @@ const AdminDashboard = () => {
     userPage * USERS_PER_PAGE,
   );
 
-  // ── Styles ──
   const tableHead = {
-    padding: "10px 14px",
+    padding: "11px 16px",
     fontSize: 11,
     fontWeight: 700,
     color: "#94A3B8",
@@ -362,35 +338,32 @@ const AdminDashboard = () => {
     letterSpacing: "0.06em",
     borderBottom: "1px solid #F1F5F9",
     background: "#FAFAFA",
+    whiteSpace: "nowrap",
+    textAlign: "left",
   };
   const tableCell = {
-    padding: "14px 14px",
+    padding: "14px 16px",
     fontSize: 13.5,
     color: "#334155",
     borderBottom: "1px solid #F8FAFC",
     verticalAlign: "middle",
+    textAlign: "left",
   };
 
   return (
-    // Top-level wrapper is now a COLUMN (h-screen flex flex-col), same as UserDashboard.
-    // Topbar sits here directly — full width, above everything else.
     <div
       className="h-screen flex flex-col overflow-hidden"
       style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
-      {/* Topbar: full-width, top-level sibling — same placement as UserDashboard */}
       <Topbar toggleSidebar={() => setSidebarOpen((v) => !v)} />
 
-      {/* Row below the Topbar: sidebar + main content side-by-side */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Your sidebar/nav component. Toggled by the Topbar's hamburger button. */}
         {sidebarOpen && (
           <div className="w-64 flex-shrink-0 overflow-y-auto border-r border-gray-100">
             <Navbar />
           </div>
         )}
 
-        {/* Page content */}
         <main
           style={{
             flex: 1,
@@ -399,11 +372,7 @@ const AdminDashboard = () => {
             background: "#F8FAFC",
           }}
         >
-          {/* ── Admin section switcher ─────────────────────────────────
-              Your Navbar's links point to user-facing routes (MyComplaint,
-              FAQ, Profile), not these 3 admin views — they were previously
-              tabs in local state, not routes. This keeps all 3 reachable.
-              Delete this block if you handle admin navigation elsewhere. */}
+          {/* Tab switcher */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
             {[
               { id: "dashboard", label: "Dashboard" },
@@ -429,7 +398,7 @@ const AdminDashboard = () => {
             ))}
           </div>
 
-          {/* ══ DASHBOARD ══════════════════════════════════════════════ */}
+          {/* ══ DASHBOARD ══ */}
           {activeNav === "dashboard" && (
             <>
               <div style={{ marginBottom: 24 }}>
@@ -455,7 +424,6 @@ const AdminDashboard = () => {
                 </p>
               </div>
 
-              {/* Stat Cards */}
               <div
                 style={{
                   display: "grid",
@@ -496,7 +464,6 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Chart + Efficiency */}
               <div
                 style={{
                   display: "grid",
@@ -613,7 +580,7 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div style={{ fontSize: 11, opacity: 0.7, marginTop: 6 }}>
-                      SYSTEM_HEALTH_INDEX:{" "}
+                      STATUS:{" "}
                       {counts.resolved >= counts.pending
                         ? "STABLE"
                         : "NEEDS ATTENTION"}
@@ -622,7 +589,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Recent Complaints */}
+              {/* Recent Complaints table */}
               <div
                 style={{
                   background: "#fff",
@@ -673,7 +640,20 @@ const AdminDashboard = () => {
                     View all →
                   </button>
                 </div>
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    tableLayout: "fixed",
+                  }}
+                >
+                  <colgroup>
+                    <col style={{ width: "35%" }} />
+                    <col style={{ width: "20%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "15%" }} />
+                    <col style={{ width: "15%" }} />
+                  </colgroup>
                   <thead>
                     <tr>
                       {[
@@ -705,8 +685,27 @@ const AdminDashboard = () => {
                       </tr>
                     ) : (
                       complaints.slice(0, 5).map((c) => (
-                        <tr key={c._id} style={{ cursor: "pointer" }}>
-                          <td style={tableCell}>
+                        <tr
+                          key={c._id}
+                          onClick={() =>
+                            navigate(`/complaint-details/${c._id}`)
+                          }
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "#F8FAFC")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "")
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <td
+                            style={{
+                              ...tableCell,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
                             <div
                               style={{
                                 fontWeight: 600,
@@ -720,7 +719,16 @@ const AdminDashboard = () => {
                               #{c._id?.slice(-6).toUpperCase()}
                             </div>
                           </td>
-                          <td style={tableCell}>{c.userID?.name || "—"}</td>
+                          <td
+                            style={{
+                              ...tableCell,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {c.userID?.UserName || c.userID?.name || "—"}
+                          </td>
                           <td style={tableCell}>
                             <span
                               style={{
@@ -760,7 +768,7 @@ const AdminDashboard = () => {
             </>
           )}
 
-          {/* ══ COMPLAINTS ══════════════════════════════════════════════ */}
+          {/* ══ COMPLAINTS ══ */}
           {activeNav === "complaints" && (
             <>
               <div
@@ -789,8 +797,7 @@ const AdminDashboard = () => {
                       margin: "4px 0 0",
                     }}
                   >
-                    Manage and update the status of all complaints across the
-                    system.
+                    Manage and update the status of all complaints.
                   </p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -835,7 +842,21 @@ const AdminDashboard = () => {
                   overflow: "hidden",
                 }}
               >
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    tableLayout: "fixed",
+                  }}
+                >
+                  <colgroup>
+                    <col style={{ width: "28%" }} />
+                    <col style={{ width: "22%" }} />
+                    <col style={{ width: "12%" }} />
+                    <col style={{ width: "13%" }} />
+                    <col style={{ width: "12%" }} />
+                    <col style={{ width: "13%" }} />
+                  </colgroup>
                   <thead>
                     <tr>
                       {[
@@ -863,7 +884,7 @@ const AdminDashboard = () => {
                             color: "#94A3B8",
                           }}
                         >
-                          Loading complaints…
+                          Loading…
                         </td>
                       </tr>
                     ) : paginatedComplaints.length === 0 ? (
@@ -881,9 +902,35 @@ const AdminDashboard = () => {
                       </tr>
                     ) : (
                       paginatedComplaints.map((c) => (
-                        <tr key={c._id}>
-                          <td style={tableCell}>
-                            <div style={{ fontWeight: 600, color: "#0F172A" }}>
+                        <tr
+                          key={c._id}
+                          onClick={() =>
+                            navigate(`/complaint-details/${c._id}`)
+                          }
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "#F8FAFC")
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "")
+                          }
+                          style={{ cursor: "pointer" }}
+                        >
+                          <td
+                            style={{
+                              ...tableCell,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            <div
+                              style={{
+                                fontWeight: 600,
+                                color: "#0F172A",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {c.title}
                             </div>
                             <div
@@ -896,12 +943,27 @@ const AdminDashboard = () => {
                               #{c._id?.slice(-6).toUpperCase()}
                             </div>
                           </td>
-                          <td style={tableCell}>
-                            <div style={{ fontWeight: 500 }}>
-                              {c.userID?.name || "—"}
+                          <td style={{ ...tableCell, overflow: "hidden" }}>
+                            <div
+                              style={{
+                                fontWeight: 500,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {c.userID?.UserName || c.userID?.name || "—"}
                             </div>
-                            <div style={{ fontSize: 11.5, color: "#94A3B8" }}>
-                              {c.userID?.email || ""}
+                            <div
+                              style={{
+                                fontSize: 11.5,
+                                color: "#94A3B8",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {c.userID?.Email || c.userID?.email || ""}
                             </div>
                           </td>
                           <td style={tableCell}>
@@ -934,7 +996,10 @@ const AdminDashboard = () => {
                           <td style={tableCell}>
                             {new Date(c.createdAt).toLocaleDateString()}
                           </td>
-                          <td style={tableCell}>
+                          <td
+                            style={tableCell}
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <select
                               value={c.status}
                               disabled={updatingId === c._id}
@@ -965,7 +1030,6 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 {totalComplaintPages > 1 && (
                   <div
                     style={{
@@ -1053,7 +1117,7 @@ const AdminDashboard = () => {
             </>
           )}
 
-          {/* ══ USERS ══════════════════════════════════════════════════ */}
+          {/* ══ USERS ══ */}
           {activeNav === "users" && (
             <>
               <div
@@ -1120,7 +1184,20 @@ const AdminDashboard = () => {
                   overflow: "hidden",
                 }}
               >
-                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    tableLayout: "fixed",
+                  }}
+                >
+                  <colgroup>
+                    <col style={{ width: "22%" }} />
+                    <col style={{ width: "28%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "14%" }} />
+                    <col style={{ width: "22%" }} />
+                  </colgroup>
                   <thead>
                     <tr>
                       {[
@@ -1165,7 +1242,12 @@ const AdminDashboard = () => {
                       </tr>
                     ) : (
                       paginatedUsers.map((u) => {
-                        const [bg, fg] = avatarColor(u.name || "");
+                        const [bg, fg] = avatarColor(
+                          u.UserName || u.name || "",
+                        );
+                        const isAdmin = u.role === "Admin";
+                        const isToggling = togglingRoleId === u._id;
+
                         return (
                           <tr key={u._id}>
                             <td style={tableCell}>
@@ -1200,8 +1282,16 @@ const AdminDashboard = () => {
                                 </span>
                               </div>
                             </td>
-                            <td style={{ ...tableCell, color: "#2563EB" }}>
-                              {u.Email}
+                            <td
+                              style={{
+                                ...tableCell,
+                                color: "#2563EB",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {u.Email || u.email}
                             </td>
                             <td style={tableCell}>
                               <span
@@ -1210,10 +1300,8 @@ const AdminDashboard = () => {
                                   fontWeight: 700,
                                   padding: "3px 10px",
                                   borderRadius: 20,
-                                  background:
-                                    u.role === "admin" ? "#EDE9FE" : "#F1F5F9",
-                                  color:
-                                    u.role === "admin" ? "#6D28D9" : "#475569",
+                                  background: isAdmin ? "#EDE9FE" : "#F1F5F9",
+                                  color: isAdmin ? "#6D28D9" : "#475569",
                                   textTransform: "uppercase",
                                   letterSpacing: "0.05em",
                                 }}
@@ -1222,40 +1310,48 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td style={tableCell}>
-                              {u.CreatedAt
-                                ? new Date(u.createdAt).toLocaleDateString(
-                                    "en-US",
-                                    {
-                                      day: "2-digit",
-                                      month: "short",
-                                      year: "numeric",
-                                    },
-                                  )
+                              {u.CreatedAt || u.createdAt
+                                ? new Date(
+                                    u.CreatedAt || u.createdAt,
+                                  ).toLocaleDateString("en-US", {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric",
+                                  })
                                 : "—"}
                             </td>
                             <td style={tableCell}>
-                              {u.role === "Admin" ? (
-                                <span
-                                  style={{ fontSize: 12.5, color: "#94A3B8" }}
-                                >
-                                  Manage Access ⋮
-                                </span>
-                              ) : (
-                                <button
-                                  style={{
-                                    border: "1px solid #E2E8F0",
-                                    borderRadius: 7,
-                                    padding: "5px 14px",
-                                    fontSize: 12.5,
-                                    cursor: "pointer",
-                                    background: "#fff",
-                                    color: "#2563EB",
-                                    fontWeight: 600,
-                                  }}
-                                >
-                                  ⬆ Upgrade to Admin
-                                </button>
-                              )}
+                              {/* Toggle role button — calls /api/auth/toggle-role/:id */}
+                              <button
+                                onClick={() => toggleRole(u._id, u.role)}
+                                disabled={isToggling}
+                                style={{
+                                  border: `1px solid ${isAdmin ? "#FECDD3" : "#BBF7D0"}`,
+                                  borderRadius: 7,
+                                  padding: "5px 14px",
+                                  fontSize: 12.5,
+                                  cursor: isToggling
+                                    ? "not-allowed"
+                                    : "pointer",
+                                  background: isAdmin ? "#FFF1F2" : "#F0FDF4",
+                                  color: isAdmin ? "#E11D48" : "#16A34A",
+                                  fontWeight: 600,
+                                  opacity: isToggling ? 0.6 : 1,
+                                  transition: "all 0.15s ease",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 6,
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {isToggling ? (
+                                  <>⏳ Updating…</>
+                                ) : isAdmin ? (
+                                  <>⬇ Demote to User</>
+                                ) : (
+                                  <>⬆ Upgrade to Admin</>
+                                )}
+                              </button>
                             </td>
                           </tr>
                         );
@@ -1264,7 +1360,6 @@ const AdminDashboard = () => {
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 <div
                   style={{
                     padding: "14px 20px",

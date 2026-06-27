@@ -22,4 +22,9 @@ router.patch("/toggle-role/:id", verifyUserToken, isAdmin, (...args) =>
   userController.ToggleUserRole(...args),
 );
 
+router.get("/profile", verifyUserToken, (...args) =>
+  userController.GetProfile(...args));
+router.put("/profile", verifyUserToken, (...args) =>
+  userController.UpdateProfile(...args));
+
 module.exports = router;

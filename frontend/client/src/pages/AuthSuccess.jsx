@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { setToken } from "../utils/auth";
 
 export const AuthSuccess = () => {
   const navigate = useNavigate();
@@ -8,30 +9,34 @@ export const AuthSuccess = () => {
   useEffect(() => {
     const handleAuth = async () => {
       const params = new URLSearchParams(window.location.search);
-
       const accessToken = params.get("token");
-      console.log("AccessToken:", accessToken);
 
-      if (accessToken) {
-        localStorage.setItem("accessToken", accessToken);
+      if (!accessToken) {
+        navigate("/login");
+        return;
+      }
 
-        try {
-          const response = await axios.get("/api/authGoogle/me", {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          });
+      // Store token via auth util (same key as local login)
+      setToken(accessToken);
 
-          if (response.data.success) {
-            navigate("/user-dashboard");
+      try {
+        const response = await axios.get("/api/authGoogle/me", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (response.data.success) {
+          // Use role from the API response to navigate correctly
+          const role = response.data.user?.role;
+          if (role === "Admin") {
+            navigate("/admin-dashboard");
           } else {
-            navigate("/login");
+            navigate("/user-dashboard");
           }
-        } catch (error) {
-          console.error("Error fetching user...", error);
+        } else {
           navigate("/login");
         }
-      } else {
+      } catch (error) {
+        console.error("Error fetching user...", error);
         navigate("/login");
       }
     };

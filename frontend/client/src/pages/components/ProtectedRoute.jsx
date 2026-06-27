@@ -27,7 +27,7 @@ function ProtectedRoute({ children, allowedRoles }) {
   if (allowedRoles && !allowedRoles.includes(role)) {
     // Logged in, but wrong role for this page — send them to their own
     // dashboard instead of bouncing back to login.
-    const fallback = role === "admin" ? "/admin-dashboard" : "/user-dashboard";
+    const fallback = role === "Admin" ? "/admin-dashboard" : "/user-dashboard";
     return <Navigate to={fallback} replace />;
   }
 

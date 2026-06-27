@@ -47,3 +47,61 @@ exports.ToggleUserRole = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
+// GET /api/auth/profile
+exports.GetProfile = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user.id).select(
+      "UserName Email role createdAt"
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        name:  user.UserName,
+        email: user.Email,
+        role:  user.role,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// PUT /api/auth/profile
+exports.UpdateProfile = async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: "Name cannot be empty" });
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+      req.user.id,
+      { UserName: name.trim() },
+      { new: true }
+    ).select("UserName Email role");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        name:  user.UserName,
+        email: user.Email,
+        role:  user.role,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

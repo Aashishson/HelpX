@@ -362,11 +362,17 @@ exports.EditComplaint = async (req, res) => {
     }
 
     // 3. Only allow editing if not resolved/rejected
-    if (complaint.status === "resolved" || complaint.status === "rejected") {
+    if (complaint.status === "resolved" || complaint.status === "rejected" ) {
       return res.status(400).json({
         message: `Complaint cannot be edited as it is already ${complaint.status}.`,
       });
     }
+
+     if (complaint.status === "in-progress") {
+       return res.status(400).json({
+         message: `Complaint cannot be edited as it is already in ${complaint.status}.`,
+       });
+     }
 
     // 4. Update only title and description
     const updated = await ComplaintModel.findByIdAndUpdate(
