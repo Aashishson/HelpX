@@ -145,7 +145,12 @@ function Login({ active, setActive }) {
             {/* Google Login */}
             <button
               type="button"
-              onClick={() => window.open("/api/authGoogle/google", "_self")}
+              onClick={() =>
+                window.open(
+                  "https://helpx-lflj.onrender.com/api/authGoogle/google",
+                  "_self",
+                )
+              }
               className="flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg py-2 text-sm font-medium hover:bg-gray-400 transition"
             >
               <FcGoogle size={20} />

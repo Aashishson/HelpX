@@ -1,48 +1,27 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/axiosInstance";
-import { setToken } from "../utils/auth";
+import { setToken, getUserRole } from "../utils/auth";
 
 export const AuthSuccess = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleAuth = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const accessToken = params.get("token");
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
-      if (!accessToken) {
-        navigate("/login");
-        return;
-      }
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
-      // Store token via auth util (same key as local login)
-      setToken(accessToken);
-
-      try {
-        const response = await api.get("/api/authGoogle/me", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-
-        if (response.data.success) {
-          // Use role from the API response to navigate correctly
-          const role = response.data.user?.role;
-          if (role === "Admin") {
-            navigate("/admin-dashboard");
-          } else {
-            navigate("/user-dashboard");
-          }
-        } else {
-          navigate("/login");
-        }
-      } catch (error) {
-        console.error("Error fetching user...", error);
-        navigate("/login");
-      }
-    };
-
-    handleAuth();
+    setToken(token);
+    const role = getUserRole();
+    navigate(role === "Admin" ? "/admin-dashboard" : "/user-dashboard");
   }, [navigate]);
 
-  return <div>Logging you in...</div>;
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 };
