@@ -24,9 +24,6 @@ const Signup = ({ active, setActive }) => {
 
   const [error, setError] = useState("");
 
-  const handleGoogleSignup = () => {
-    console.log("Signup with Google clicked");
-  };
 
   const validatePassword = (password) => {
     const strongPassword =
@@ -52,7 +49,7 @@ const Signup = ({ active, setActive }) => {
     try {
       setLoading(true);
       const data = {
-        Username: name,
+        UserName: name,
         Email: email,
         Password: password,
       };
