@@ -64,18 +64,13 @@ export default function EditStatus() {
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-        const res = await api.get(`/api/complaint/details/${id}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-        const data = await res.json();
-        if (data.complaint) {
-          setComplaint(data.complaint);
-          setSelectedStatus(data.complaint.status);
-        } else {
-          toast.error("Complaint not found.");
-        }
+       const res = await api.get(`/api/complaint/details/${id}`);
+       if (res.data.complaint) {
+         setComplaint(res.data.complaint);
+         setSelectedStatus(res.data.complaint.status);
+       } else {
+         toast.error("Complaint not found.");
+       }
       } catch (err) {
         toast.error("Failed to load complaint.");
       } finally {
@@ -86,39 +81,28 @@ export default function EditStatus() {
     fetchComplaint();
   }, [id]);
 
-  const handleSave = async () => {
-    if (selectedStatus === complaint.status) {
-      toast.info("Status is already set to this value.");
-      return;
+   const handleSave = async () => {
+  if (selectedStatus === complaint.status) {
+    toast.info("Status is already set to this value.");
+    return;
+  }
+
+  setSaving(true);
+  try {
+    const res = await api.patch(`/api/complaint/update-status/${id}`, { status: selectedStatus });
+
+    if (res.data.success) {
+      toast.success(`Status updated to "${STATUS_CONFIG[selectedStatus].label}"`);
+      setComplaint((prev) => ({ ...prev, status: selectedStatus }));
+    } else {
+      toast.error(res.data.message || "Update failed.");
     }
-
-    setSaving(true);
-    try {
-      const res = await api.patch(`/api/complaint/update-status/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify({ status: selectedStatus }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        toast.success(
-          `Status updated to "${STATUS_CONFIG[selectedStatus].label}"`,
-        );
-        setComplaint((prev) => ({ ...prev, status: selectedStatus }));
-      } else {
-        toast.error(data.message || "Update failed.");
-      }
-    } catch (err) {
-      toast.error("Something went wrong.");
-    } finally {
-      setSaving(false);
-    }
-  };
+  } catch (err) {
+    toast.error("Something went wrong.");
+  } finally {
+    setSaving(false);
+  }
+};
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";

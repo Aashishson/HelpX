@@ -26,7 +26,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await axios.get("/api/auth/profile", {
+        const res = await api.get("/api/auth/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const u = res.data.user || res.data;

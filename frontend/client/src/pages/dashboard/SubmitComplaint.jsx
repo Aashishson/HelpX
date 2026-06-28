@@ -38,7 +38,7 @@ const ComplaintForm = () => {
         formData,
       );
    
-
+      const role = getUserRole(); 
       toast.success("Complaint submitted!");
       navigate(role === "Admin" ? "/admin-dashboard" : "/user-dashboard");
     } catch (error) {
