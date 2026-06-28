@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import api from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Topbar from "../components/Topbar";
+import NavBar from "../components/Navbar";
+import TopBar from "../components/Topbar";
 
 const avatar = (name = "") => {
   if (!name) return "?";
