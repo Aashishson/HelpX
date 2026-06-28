@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/NavBar.jsx";
 import Topbar from "../components/TopBar.jsx";
+import api from "../../utils/axiosInstance.jsx"
 
 const STATUS_CONFIG = {
   pending: {
@@ -63,7 +64,7 @@ export default function EditStatus() {
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-        const res = await fetch(`/api/complaint/details/${id}`, {
+        const res = await api.get(`/api/complaint/details/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
@@ -93,7 +94,7 @@ export default function EditStatus() {
 
     setSaving(true);
     try {
-      const res = await fetch(`/api/complaint/update-status/${id}`, {
+      const res = await api.patch(`/api/complaint/update-status/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

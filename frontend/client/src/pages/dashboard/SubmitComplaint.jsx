@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // 1. Import Axios
+import api from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
+import { getUserRole } from "../../utils/auth";
 
 const ComplaintForm = () => {
   const navigate = useNavigate();
@@ -32,20 +33,14 @@ const ComplaintForm = () => {
     }
 
     try {
-      const token = localStorage.getItem("accessToken"); // Assuming token is stored here
-      const response = await axios.post(
+      const response = await api.post(
         "/api/complaint/create-complaint",
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        },
       );
+   
 
       toast.success("Complaint submitted!");
-      navigate("/user-dashboard"); // Redirect to your cards view
+      navigate(role === "Admin" ? "/admin-dashboard" : "/user-dashboard");
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit complaint.");

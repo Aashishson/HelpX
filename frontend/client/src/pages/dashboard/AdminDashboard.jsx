@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Topbar from "../components/Topbar";
 
-const api = (token) => ({
-  headers: { Authorization: `Bearer ${token}` },
-});
-
-const avatar = (name = "") =>
-  name
+const avatar = (name = "") => {
+  if (!name) return "?";
+  return name
     .split(" ")
     .map((w) => w[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+};
 
 const avatarColor = (name = "") => {
-  const colors = [
+  const palette = [
     ["#E0E7FF", "#4338CA"],
     ["#FCE7F3", "#BE185D"],
     ["#D1FAE5", "#065F46"],
@@ -25,8 +23,8 @@ const avatarColor = (name = "") => {
     ["#EDE9FE", "#6D28D9"],
     ["#FFE4E6", "#9F1239"],
   ];
-  if (!name || name.length === 0) return colors[0];
-  return colors[name.charCodeAt(0) % colors.length] ?? colors[0];
+  if (!name || name.length === 0) return palette[0];
+  return palette[name.charCodeAt(0) % palette.length] ?? palette[0];
 };
 
 const statusMeta = {
@@ -215,32 +213,53 @@ const BarChart = ({ counts }) => {
   );
 };
 
+const PriorityBadge = ({ priority }) => (
+  <span
+    style={{
+      fontSize: 12,
+      fontWeight: 600,
+      padding: "3px 10px",
+      borderRadius: 20,
+      background:
+        priority === "High"
+          ? "#FFE4E6"
+          : priority === "Medium"
+            ? "#FEF3C7"
+            : "#D1FAE5",
+      color:
+        priority === "High"
+          ? "#9F1239"
+          : priority === "Medium"
+            ? "#92400E"
+            : "#065F46",
+    }}
+  >
+    {priority || "Low"}
+  </span>
+);
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("accessToken");
 
   const [activeNav, setActiveNav] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
   const [complaints, setComplaints] = useState([]);
   const [users, setUsers] = useState([]);
   const [loadingComplaints, setLoadingComplaints] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
-
   const [updatingId, setUpdatingId] = useState(null);
   const [togglingRoleId, setTogglingRoleId] = useState(null);
-
   const [roleFilter, setRoleFilter] = useState("all");
   const [userPage, setUserPage] = useState(1);
-  const USERS_PER_PAGE = 5;
-
   const [statusFilter, setStatusFilter] = useState("all");
   const [complaintPage, setComplaintPage] = useState(1);
+
+  const USERS_PER_PAGE = 5;
   const COMPLAINTS_PER_PAGE = 7;
 
   useEffect(() => {
-    axios
-      .get("/api/complaint/all-complaints", api(token))
+    api
+      .get("/api/complaint/all-complaints")
       .then((res) => {
         if (res.data.success) setComplaints(res.data.complaints);
       })
@@ -249,8 +268,8 @@ const AdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    axios
-      .get("/api/auth/all-users", api(token))
+    api
+      .get("/api/auth/all-users")
       .then((res) => {
         if (res.data.success) setUsers(res.data.users);
       })
@@ -261,11 +280,7 @@ const AdminDashboard = () => {
   const updateStatus = async (id, status) => {
     setUpdatingId(id);
     try {
-      await axios.patch(
-        `/api/complaint/update-status/${id}`,
-        { status },
-        api(token),
-      );
+      await api.patch(`/api/complaint/update-status/${id}`, { status });
       setComplaints((prev) =>
         prev.map((c) => (c._id === id ? { ...c, status } : c)),
       );
@@ -276,15 +291,10 @@ const AdminDashboard = () => {
     }
   };
 
-  // ── Toggle user role ──────────────────────────────────────────
-  const toggleRole = async (userId, currentRole) => {
+  const toggleRole = async (userId) => {
     setTogglingRoleId(userId);
     try {
-      const res = await axios.patch(
-        `/api/auth/toggle-role/${userId}`,
-        {},
-        api(token),
-      );
+      const res = await api.patch(`/api/auth/toggle-role/${userId}`, {});
       if (res.data.success) {
         setUsers((prev) =>
           prev.map((u) =>
@@ -350,6 +360,59 @@ const AdminDashboard = () => {
     textAlign: "left",
   };
 
+  const Pagination = ({ page, totalPages, onPageChange }) => (
+    <div style={{ display: "flex", gap: 6 }}>
+      <button
+        onClick={() => onPageChange(Math.max(1, page - 1))}
+        disabled={page === 1}
+        style={{
+          border: "1px solid #E2E8F0",
+          background: "#fff",
+          borderRadius: 6,
+          padding: "4px 12px",
+          cursor: "pointer",
+          fontSize: 13,
+          opacity: page === 1 ? 0.4 : 1,
+        }}
+      >
+        ←
+      </button>
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <button
+          key={p}
+          onClick={() => onPageChange(p)}
+          style={{
+            border: "none",
+            borderRadius: 6,
+            padding: "4px 10px",
+            cursor: "pointer",
+            fontSize: 13,
+            background: page === p ? "#2563EB" : "#F1F5F9",
+            color: page === p ? "#fff" : "#475569",
+            fontWeight: page === p ? 700 : 400,
+          }}
+        >
+          {p}
+        </button>
+      ))}
+      <button
+        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+        disabled={page === totalPages}
+        style={{
+          border: "1px solid #E2E8F0",
+          background: "#fff",
+          borderRadius: 6,
+          padding: "4px 12px",
+          cursor: "pointer",
+          fontSize: 13,
+          opacity: page === totalPages ? 0.4 : 1,
+        }}
+      >
+        →
+      </button>
+    </div>
+  );
+
   return (
     <div
       className="h-screen flex flex-col overflow-hidden"
@@ -372,33 +435,59 @@ const AdminDashboard = () => {
             background: "#F8FAFC",
           }}
         >
-          {/* Tab switcher */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            {[
-              { id: "dashboard", label: "Dashboard" },
-              { id: "users", label: "User Management" },
-              { id: "complaints", label: "Complaint Reports" },
-            ].map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setActiveNav(t.id)}
-                style={{
-                  padding: "6px 16px",
-                  borderRadius: 20,
-                  fontSize: 12.5,
-                  cursor: "pointer",
-                  fontWeight: activeNav === t.id ? 700 : 500,
-                  border: activeNav === t.id ? "none" : "1px solid #E2E8F0",
-                  background: activeNav === t.id ? "#2563EB" : "#fff",
-                  color: activeNav === t.id ? "#fff" : "#475569",
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 20,
+            }}
+          >
+            <div style={{ display: "flex", gap: 8 }}>
+              {[
+                { id: "dashboard", label: "Dashboard" },
+                { id: "users", label: "User Management" },
+                { id: "complaints", label: "Complaint Reports" },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveNav(t.id)}
+                  style={{
+                    padding: "6px 16px",
+                    borderRadius: 20,
+                    fontSize: 12.5,
+                    cursor: "pointer",
+                    fontWeight: activeNav === t.id ? 700 : 500,
+                    border: activeNav === t.id ? "none" : "1px solid #E2E8F0",
+                    background: activeNav === t.id ? "#2563EB" : "#fff",
+                    color: activeNav === t.id ? "#fff" : "#475569",
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate("/complaint")}
+              style={{
+                padding: "8px 18px",
+                borderRadius: 8,
+                fontSize: 13,
+                cursor: "pointer",
+                background: "#2563EB",
+                color: "#fff",
+                border: "none",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              + New Complaint
+            </button>
           </div>
 
-          {/* ══ DASHBOARD ══ */}
           {activeNav === "dashboard" && (
             <>
               <div style={{ marginBottom: 24 }}>
@@ -589,7 +678,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Recent Complaints table */}
               <div
                 style={{
                   background: "#fff",
@@ -730,28 +818,7 @@ const AdminDashboard = () => {
                             {c.userID?.UserName || c.userID?.name || "—"}
                           </td>
                           <td style={tableCell}>
-                            <span
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: "3px 10px",
-                                borderRadius: 20,
-                                background:
-                                  c.priority === "High"
-                                    ? "#FFE4E6"
-                                    : c.priority === "Medium"
-                                      ? "#FEF3C7"
-                                      : "#D1FAE5",
-                                color:
-                                  c.priority === "High"
-                                    ? "#9F1239"
-                                    : c.priority === "Medium"
-                                      ? "#92400E"
-                                      : "#065F46",
-                              }}
-                            >
-                              {c.priority || "Low"}
-                            </span>
+                            <PriorityBadge priority={c.priority} />
                           </td>
                           <td style={tableCell}>
                             <Badge status={c.status} />
@@ -768,7 +835,6 @@ const AdminDashboard = () => {
             </>
           )}
 
-          {/* ══ COMPLAINTS ══ */}
           {activeNav === "complaints" && (
             <>
               <div
@@ -915,13 +981,7 @@ const AdminDashboard = () => {
                           }
                           style={{ cursor: "pointer" }}
                         >
-                          <td
-                            style={{
-                              ...tableCell,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
+                          <td style={{ ...tableCell, overflow: "hidden" }}>
                             <div
                               style={{
                                 fontWeight: 600,
@@ -967,28 +1027,7 @@ const AdminDashboard = () => {
                             </div>
                           </td>
                           <td style={tableCell}>
-                            <span
-                              style={{
-                                fontSize: 12,
-                                fontWeight: 600,
-                                padding: "3px 10px",
-                                borderRadius: 20,
-                                background:
-                                  c.priority === "High"
-                                    ? "#FFE4E6"
-                                    : c.priority === "Medium"
-                                      ? "#FEF3C7"
-                                      : "#D1FAE5",
-                                color:
-                                  c.priority === "High"
-                                    ? "#9F1239"
-                                    : c.priority === "Medium"
-                                      ? "#92400E"
-                                      : "#065F46",
-                              }}
-                            >
-                              {c.priority || "Low"}
-                            </span>
+                            <PriorityBadge priority={c.priority} />
                           </td>
                           <td style={tableCell}>
                             <Badge status={c.status} />
@@ -1048,76 +1087,17 @@ const AdminDashboard = () => {
                       )}{" "}
                       of {filteredComplaints.length}
                     </span>
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button
-                        onClick={() =>
-                          setComplaintPage((p) => Math.max(1, p - 1))
-                        }
-                        disabled={complaintPage === 1}
-                        style={{
-                          border: "1px solid #E2E8F0",
-                          background: "#fff",
-                          borderRadius: 6,
-                          padding: "4px 12px",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          color: "#475569",
-                          opacity: complaintPage === 1 ? 0.4 : 1,
-                        }}
-                      >
-                        ←
-                      </button>
-                      {Array.from(
-                        { length: totalComplaintPages },
-                        (_, i) => i + 1,
-                      ).map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => setComplaintPage(p)}
-                          style={{
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "4px 10px",
-                            cursor: "pointer",
-                            fontSize: 13,
-                            background:
-                              complaintPage === p ? "#2563EB" : "#F1F5F9",
-                            color: complaintPage === p ? "#fff" : "#475569",
-                            fontWeight: complaintPage === p ? 700 : 400,
-                          }}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setComplaintPage((p) =>
-                            Math.min(totalComplaintPages, p + 1),
-                          )
-                        }
-                        disabled={complaintPage === totalComplaintPages}
-                        style={{
-                          border: "1px solid #E2E8F0",
-                          background: "#fff",
-                          borderRadius: 6,
-                          padding: "4px 12px",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          color: "#475569",
-                          opacity:
-                            complaintPage === totalComplaintPages ? 0.4 : 1,
-                        }}
-                      >
-                        →
-                      </button>
-                    </div>
+                    <Pagination
+                      page={complaintPage}
+                      totalPages={totalComplaintPages}
+                      onPageChange={setComplaintPage}
+                    />
                   </div>
                 )}
               </div>
             </>
           )}
 
-          {/* ══ USERS ══ */}
           {activeNav === "users" && (
             <>
               <div
@@ -1242,14 +1222,23 @@ const AdminDashboard = () => {
                       </tr>
                     ) : (
                       paginatedUsers.map((u) => {
-                        const [bg, fg] = avatarColor(
+                        const colorPair = avatarColor(
                           u.UserName || u.name || "",
                         );
+                        const bg = colorPair[0];
+                        const fg = colorPair[1];
                         const isAdmin = u.role === "Admin";
                         const isToggling = togglingRoleId === u._id;
-
                         return (
-                          <tr key={u._id}>
+                          <tr
+                            key={u._id}
+                            onMouseEnter={(e) =>
+                              (e.currentTarget.style.background = "#F8FAFC")
+                            }
+                            onMouseLeave={(e) =>
+                              (e.currentTarget.style.background = "")
+                            }
+                          >
                             <td style={tableCell}>
                               <div
                                 style={{
@@ -1273,12 +1262,18 @@ const AdminDashboard = () => {
                                     flexShrink: 0,
                                   }}
                                 >
-                                  {avatar(u.UserName)}
+                                  {avatar(u.UserName || u.name)}
                                 </div>
                                 <span
-                                  style={{ fontWeight: 600, color: "#0F172A" }}
+                                  style={{
+                                    fontWeight: 600,
+                                    color: "#0F172A",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    whiteSpace: "nowrap",
+                                  }}
                                 >
-                                  {u.UserName}
+                                  {u.UserName || u.name || "—"}
                                 </span>
                               </div>
                             </td>
@@ -1321,9 +1316,8 @@ const AdminDashboard = () => {
                                 : "—"}
                             </td>
                             <td style={tableCell}>
-                              {/* Toggle role button — calls /api/auth/toggle-role/:id */}
                               <button
-                                onClick={() => toggleRole(u._id, u.role)}
+                                onClick={() => toggleRole(u._id)}
                                 disabled={isToggling}
                                 style={{
                                   border: `1px solid ${isAdmin ? "#FECDD3" : "#BBF7D0"}`,
@@ -1337,7 +1331,6 @@ const AdminDashboard = () => {
                                   color: isAdmin ? "#E11D48" : "#16A34A",
                                   fontWeight: 600,
                                   opacity: isToggling ? 0.6 : 1,
-                                  transition: "all 0.15s ease",
                                   display: "flex",
                                   alignItems: "center",
                                   gap: 6,
@@ -1374,61 +1367,11 @@ const AdminDashboard = () => {
                     system users
                   </span>
                   {totalUserPages > 1 && (
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button
-                        onClick={() => setUserPage((p) => Math.max(1, p - 1))}
-                        disabled={userPage === 1}
-                        style={{
-                          border: "1px solid #E2E8F0",
-                          background: "#fff",
-                          borderRadius: 6,
-                          padding: "4px 12px",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          opacity: userPage === 1 ? 0.4 : 1,
-                        }}
-                      >
-                        ←
-                      </button>
-                      {Array.from(
-                        { length: totalUserPages },
-                        (_, i) => i + 1,
-                      ).map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => setUserPage(p)}
-                          style={{
-                            border: "none",
-                            borderRadius: 6,
-                            padding: "4px 10px",
-                            cursor: "pointer",
-                            fontSize: 13,
-                            background: userPage === p ? "#2563EB" : "#F1F5F9",
-                            color: userPage === p ? "#fff" : "#475569",
-                            fontWeight: userPage === p ? 700 : 400,
-                          }}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setUserPage((p) => Math.min(totalUserPages, p + 1))
-                        }
-                        disabled={userPage === totalUserPages}
-                        style={{
-                          border: "1px solid #E2E8F0",
-                          background: "#fff",
-                          borderRadius: 6,
-                          padding: "4px 12px",
-                          cursor: "pointer",
-                          fontSize: 13,
-                          opacity: userPage === totalUserPages ? 0.4 : 1,
-                        }}
-                      >
-                        →
-                      </button>
-                    </div>
+                    <Pagination
+                      page={userPage}
+                      totalPages={totalUserPages}
+                      onPageChange={setUserPage}
+                    />
                   )}
                 </div>
               </div>

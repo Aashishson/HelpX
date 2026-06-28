@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
@@ -25,7 +25,7 @@ const StepIcon = ({ done, active, rejected }) => {
           className="w-4 h-4 text-white"
           fill="none"
           viewBox="0 0 24 24"
-          stroke="currentWidth"
+          stroke="currentColor"
           strokeWidth={2.5}
         >
           <path
@@ -75,13 +75,13 @@ const ComplaintDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const role = localStorage.getItem("role");
+  const isAdmin = role === "Admin";
+
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const response = await axios.get(`/api/complaint/details/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get(`/api/complaint/details/${id}`);
         setComplaint(response.data.complaint);
       } catch (err) {
         setError("Failed to load complaint details.");
@@ -103,9 +103,7 @@ const ComplaintDetail = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
-          className={`hidden md:block bg-white shadow transition-all duration-300 ${
-            sidebarOpen ? "w-64" : "w-0 overflow-hidden"
-          }`}
+          className={`hidden md:block bg-white shadow transition-all duration-300 ${sidebarOpen ? "w-64" : "w-0 overflow-hidden"}`}
         >
           <Navbar />
         </div>
@@ -148,10 +146,7 @@ const ComplaintDetail = () => {
                   </h1>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${
-                        priorityStyles[complaint.priority] ||
-                        "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide ${priorityStyles[complaint.priority] || "bg-gray-100 text-gray-600"}`}
                     >
                       {complaint.priority || "Low"} Priority
                     </span>
@@ -192,11 +187,7 @@ const ComplaintDetail = () => {
                             <div className="flex flex-col items-center gap-2">
                               <StepIcon done={done} active={active} />
                               <span
-                                className={`text-xs font-medium uppercase tracking-wide ${
-                                  done || active
-                                    ? "text-blue-600"
-                                    : "text-gray-400"
-                                }`}
+                                className={`text-xs font-medium uppercase tracking-wide ${done || active ? "text-blue-600" : "text-gray-400"}`}
                               >
                                 {step === "in-progress"
                                   ? "In Progress"
@@ -206,11 +197,7 @@ const ComplaintDetail = () => {
                             </div>
                             {index < STATUS_STEPS.length - 1 && (
                               <div
-                                className={`flex-1 h-0.5 mx-3 mb-5 rounded ${
-                                  index < currentStep
-                                    ? "bg-blue-600"
-                                    : "bg-gray-200"
-                                }`}
+                                className={`flex-1 h-0.5 mx-3 mb-5 rounded ${index < currentStep ? "bg-blue-600" : "bg-gray-200"}`}
                               />
                             )}
                           </div>
@@ -298,7 +285,9 @@ const ComplaintDetail = () => {
                             Filed by
                           </p>
                           <p className="text-gray-700 font-medium">
-                            {complaint.userID?.name || "You"}
+                            {complaint.userID?.UserName ||
+                              complaint.userID?.name ||
+                              "You"}
                           </p>
                         </div>
                         <div>
@@ -327,9 +316,8 @@ const ComplaintDetail = () => {
                       </div>
                     </div>
 
-                    {/* Edit Button — only if still pending or in-progress */}
-                    {(complaint.status === "pending" ||
-                      complaint.status === "in-progress") && (
+                    {/* Edit Complaint — only if pending */}
+                    {complaint.status === "pending" && !isAdmin && (
                       <button
                         onClick={() =>
                           navigate(`/edit-complaint/${complaint._id}`)
@@ -338,6 +326,19 @@ const ComplaintDetail = () => {
                                    hover:bg-blue-700 transition flex items-center justify-center gap-2"
                       >
                         ✏️ Edit Complaint
+                      </button>
+                    )}
+
+                    {/* Edit Status — only for Admins */}
+                    {isAdmin && (
+                      <button
+                        onClick={() =>
+                          navigate(`/edit-status/${complaint._id}`)
+                        }
+                        className="w-full bg-purple-600 text-white py-2.5 rounded-lg text-sm font-medium
+                                   hover:bg-purple-700 transition flex items-center justify-center gap-2"
+                      >
+                        🛡️ Edit Status
                       </button>
                     )}
                   </div>

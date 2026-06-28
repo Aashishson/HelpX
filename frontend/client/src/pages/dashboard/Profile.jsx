@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosInstance";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
 import { FaUserCircle } from "react-icons/fa";
@@ -51,7 +51,7 @@ const Profile = () => {
     setError(null);
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.put("/api/auth/profile", formData, {
+      await api.put("/api/auth/profile", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser((prev) => ({ ...prev, name: formData.name }));

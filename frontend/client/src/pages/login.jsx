@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import { FcGoogle } from "react-icons/fc";
 import Slider from "./components/Slider.jsx";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axiosInstance.jsx"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { setToken, getUserRole } from "../utils/auth";
@@ -27,7 +27,7 @@ function Login({ active, setActive }) {
 
     try {
       setLoading(true);
-      const response = await axios.post("/api/auth/login", data, {
+      const response = await api.post("/api/auth/login", data, {
         headers: { "Content-Type": "application/json" },
       });
 

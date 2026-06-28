@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosInstance"
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
@@ -171,10 +171,7 @@ const MyComplaint = () => {
   useEffect(() => {
     const fetchComplaints = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const response = await axios.get("/api/complaint/user-complaints", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get("/api/complaint/user-complaints");
         if (response.data.success) {
           setComplaints(response.data.complaints);
         }
@@ -195,10 +192,7 @@ const MyComplaint = () => {
   // ================== Delete Function ==================
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("accessToken");
-      await axios.delete(`/api/complaint/delete-complaint/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.delete(`/api/complaint/delete-complaint/${id}`);
       setComplaints((prev) => prev.filter((c) => c._id !== id));
     } catch (error) {
       console.error("Delete failed", error);

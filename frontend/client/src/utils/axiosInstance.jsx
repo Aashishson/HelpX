@@ -3,8 +3,7 @@ import { getToken, clearToken } from "./auth";
 
 const api = axios.create({
   baseURL:
-    import.meta.env.VITE_API_BASE_URL ||
-    "https://your-helpx-backend.onrender.com",
+    "https://helpx-lflj.onrender.com",
 });
 
 api.interceptors.request.use((config) => {

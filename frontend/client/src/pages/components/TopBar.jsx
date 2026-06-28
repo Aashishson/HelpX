@@ -1,30 +1,20 @@
 import { FaBars } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import api from "../../utils/axiosInstance";
 
 function Topbar({ toggleSidebar }) {
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      const token = localStorage.getItem("token");
-
-      await fetch("/auth/logOut", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Clear local storage anyway
-      localStorage.removeItem("token");
-
-      // Redirect to login page
-      navigate("/login");
-    }
-  };
+const handleLogout = async () => {
+  try {
+    await api.post("/api/auth/logOut"); // interceptor auto-attaches the token
+  } catch (error) {
+    console.error("Logout error:", error);
+  } finally {
+    localStorage.removeItem("token");
+    navigate("/login");
+  }
+};
 
   return (
     <div className="flex items-center h-14 px-4 bg-gray-50 shadow gap-4">

@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Slider from "./components/Slider.jsx";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axiosInstance.jsx"
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -57,7 +57,7 @@ const Signup = ({ active, setActive }) => {
         Password: password,
       };
 
-      const response = await axios.post("/api/auth/signup", data, {
+      const response = await api.post("/api/auth/signup", data, {
         headers: {
           "Content-Type": "application/json",
         },

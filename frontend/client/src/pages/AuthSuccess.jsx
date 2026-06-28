@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axiosInstance";
 import { setToken } from "../utils/auth";
 
 export const AuthSuccess = () => {
@@ -20,7 +20,7 @@ export const AuthSuccess = () => {
       setToken(accessToken);
 
       try {
-        const response = await axios.get("/api/authGoogle/me", {
+        const response = await api.get("/api/authGoogle/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 

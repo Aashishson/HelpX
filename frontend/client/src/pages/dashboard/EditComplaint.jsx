@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosInstance"
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from "../components/NavBar";
 import Topbar from "../components/TopBar";
@@ -22,10 +22,7 @@ const EditComplaint = () => {
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-        const token = localStorage.getItem("accessToken");
-        const response = await axios.get(`/api/complaint/details/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get(`/api/complaint/details/${id}`);
         const { title, description } = response.data.complaint;
         setFormData({ title, description });
       } catch (err) {
@@ -46,7 +43,7 @@ const EditComplaint = () => {
 
     try {
       const token = localStorage.getItem("accessToken");
-      await axios.put(`/api/complaint/edit/${id}`, formData, {
+      await api.patch(`/api/complaint/edit/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSuccess(true);

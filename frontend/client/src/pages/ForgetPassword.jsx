@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import api from "../utils/axiosInstance"
 
 function ForgetPassword() {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ function ForgetPassword() {
       if (step === 1) {
         setLoading(true);
 
-        const response = await axios.post("/api/auth/send-otp", {
+        const response = await api.post("/api/auth/send-otp", {
           Email: email,
         });
 
@@ -60,7 +60,7 @@ function ForgetPassword() {
 
         setLoading(true);
 
-        const checkOtp = await axios.post("/api/auth/verify-otp", {
+        const checkOtp = await api.post("/api/auth/verify-otp", {
           Email: email,
           Otp: otp,
         });
@@ -96,7 +96,7 @@ function ForgetPassword() {
 
         setLoading(true);
 
-        const response = await axios.post("/api/auth/reset-password", {
+        const response = await api.post("/api/auth/reset-password", {
           token: resetToken,
           newPassword: password,
         });
