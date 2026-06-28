@@ -132,10 +132,7 @@ exports.GetComplaintDetails = async (req, res) => {
       });
     }
 
-    // Security: Optional - if you want ONLY the owner or an Admin to see it
-    // if (complaint.userID._id.toString() !== req.user._id.toString()) {
-    //   return res.status(403).json({ message: "Access denied" });
-    // }
+  
 
     return res.status(200).json({
       message: "Complaint details retrieved successfully",

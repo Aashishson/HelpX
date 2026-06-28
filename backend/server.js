@@ -1,6 +1,6 @@
 const express = require("express");
 const connectMongoDB = require("./config/ConnnectMongoDB");
-const dotenv = require("dotenv").config();
+require("dotenv").config();
 const routes = require("./routes");
 require ("./config/passport.js");
 const cors = require("cors");
