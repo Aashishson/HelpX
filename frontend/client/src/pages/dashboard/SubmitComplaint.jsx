@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Navbar from "../components/NavBar";
-import Topbar from "../components/TopBar";
+import Navbar from "../components/Navbar";
+import Topbar from "../components/Topbar";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/axiosInstance";
 import { toast } from "react-toastify";
@@ -37,8 +37,8 @@ const ComplaintForm = () => {
         "/api/complaint/create-complaint",
         formData,
       );
-   
-      const role = getUserRole(); 
+
+      const role = getUserRole();
       toast.success("Complaint submitted!");
       navigate(role === "Admin" ? "/admin-dashboard" : "/user-dashboard");
     } catch (error) {

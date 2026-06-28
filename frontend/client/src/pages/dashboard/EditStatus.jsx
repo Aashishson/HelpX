@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Navbar from "../components/NavBar.jsx";
-import Topbar from "../components/TopBar.jsx";
-import api from "../../utils/axiosInstance.jsx"
+import Navbar from "../components/Navbar.jsx";
+import Topbar from "../components/Topbar.jsx";
+import api from "../../utils/axiosInstance.jsx";
 
 const STATUS_CONFIG = {
   pending: {
@@ -64,13 +64,13 @@ export default function EditStatus() {
   useEffect(() => {
     const fetchComplaint = async () => {
       try {
-       const res = await api.get(`/api/complaint/details/${id}`);
-       if (res.data.complaint) {
-         setComplaint(res.data.complaint);
-         setSelectedStatus(res.data.complaint.status);
-       } else {
-         toast.error("Complaint not found.");
-       }
+        const res = await api.get(`/api/complaint/details/${id}`);
+        if (res.data.complaint) {
+          setComplaint(res.data.complaint);
+          setSelectedStatus(res.data.complaint.status);
+        } else {
+          toast.error("Complaint not found.");
+        }
       } catch (err) {
         toast.error("Failed to load complaint.");
       } finally {
@@ -81,28 +81,32 @@ export default function EditStatus() {
     fetchComplaint();
   }, [id]);
 
-   const handleSave = async () => {
-  if (selectedStatus === complaint.status) {
-    toast.info("Status is already set to this value.");
-    return;
-  }
-
-  setSaving(true);
-  try {
-    const res = await api.patch(`/api/complaint/update-status/${id}`, { status: selectedStatus });
-
-    if (res.data.success) {
-      toast.success(`Status updated to "${STATUS_CONFIG[selectedStatus].label}"`);
-      setComplaint((prev) => ({ ...prev, status: selectedStatus }));
-    } else {
-      toast.error(res.data.message || "Update failed.");
+  const handleSave = async () => {
+    if (selectedStatus === complaint.status) {
+      toast.info("Status is already set to this value.");
+      return;
     }
-  } catch (err) {
-    toast.error("Something went wrong.");
-  } finally {
-    setSaving(false);
-  }
-};
+
+    setSaving(true);
+    try {
+      const res = await api.patch(`/api/complaint/update-status/${id}`, {
+        status: selectedStatus,
+      });
+
+      if (res.data.success) {
+        toast.success(
+          `Status updated to "${STATUS_CONFIG[selectedStatus].label}"`,
+        );
+        setComplaint((prev) => ({ ...prev, status: selectedStatus }));
+      } else {
+        toast.error(res.data.message || "Update failed.");
+      }
+    } catch (err) {
+      toast.error("Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";

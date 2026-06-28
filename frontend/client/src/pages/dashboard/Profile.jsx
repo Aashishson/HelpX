@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../../utils/axiosInstance";
-import Navbar from "../components/NavBar";
-import Topbar from "../components/TopBar";
+import Navbar from "../components/Navbar";
+import Topbar from "../components/Topbar";
 import { FaUserCircle } from "react-icons/fa";
 import { HiOutlinePencilSquare, HiOutlineCheck } from "react-icons/hi2";
 

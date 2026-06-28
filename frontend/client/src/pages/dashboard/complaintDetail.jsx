@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import api from "../../utils/axiosInstance";
 import { useNavigate, useParams } from "react-router-dom";
-import Navbar from "../components/NavBar";
-import Topbar from "../components/TopBar";
+import Navbar from "../components/Navbar";
+import Topbar from "../components/Topbar";
 
 const STATUS_STEPS = ["pending", "in-progress", "resolved"];
 

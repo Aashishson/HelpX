@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Navbar from "../components/NavBar";
-import Topbar from "../components/TopBar";
+import Navbar from "../components/Navbar";
+import Topbar from "../components/Topbar";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
 import {
   HiOutlineInformationCircle,
