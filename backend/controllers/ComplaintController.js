@@ -205,34 +205,24 @@ exports.GetUserRecentComplaints = async (req, res) => {
 // controllers/ComplaintController.js
 
 exports.GetAllComplaintsForAdmin = async (req, res) => {
-  try {
-    // 1. Fetch all complaints from the collection
-    // 2. Sort by 'createdAt' descending (newest first)
-    // 3. Populate 'userID' to get the name and email of the complainant
-    const allComplaints = await ComplaintModel.find()
-      .sort({ createdAt: -1 })
-      .populate("userID", "name email");
+ 
+   try {
+     const allComplaints = await ComplaintModel.find()
+       .sort({ createdAt: -1 })
+       .populate("userID", "UserName Email"); // ← make sure this is here
 
-    if (!allComplaints || allComplaints.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: "No complaints found in the system.",
-        complaints: [],
-      });
-    }
+     return res.status(200).json({
+       success: true,
+       count: allComplaints.length,
+       complaints: allComplaints,
+     });
+   } catch (error) {
+     return res.status(500).json({
+       message: "Internal Server Error",
+     });
+   }
+ };
 
-    return res.status(200).json({
-      success: true,
-      count: allComplaints.length,
-      complaints: allComplaints,
-    });
-  } catch (error) {
-    console.error("Admin Fetch Error:", error);
-    return res.status(500).json({
-      message: "Internal Server Error occurred while fetching all complaints.",
-    });
-  }
-};
 
 exports.GetUserComplaints = async (req, res) => {
   try {
